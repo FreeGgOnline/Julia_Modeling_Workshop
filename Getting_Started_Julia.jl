@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.0
+# v0.20.18
 
 using Markdown
 using InteractiveUtils
@@ -215,7 +215,7 @@ md"""
 
 ### Additional Resources
 
-🎮 **[Discord](https://discord.gg/julia)** - Gaming and casual chat
+💬 **[Discord](https://discord.gg/julia)** - Community chat and discussions
 
 📧 **[Zulip](https://julialang.zulipchat.com/)** - Threaded conversations
 
@@ -266,140 +266,10 @@ md"""
 Press `?` to enter help mode, then type any function or type name!
 """
 
-# ╔═╡ abcdef01-2345-6789-abcd-ef0123456789
-md"""
-## 🚀 Quick Start Examples
-
-### Your First Julia Function
-"""
-
-# ╔═╡ bcdef012-3456-789a-bcde-f01234567890
-function greet(name)
-    "Hello, $name! Welcome to Julia! 🚀"
-end
-
-# ╔═╡ cdef0123-4567-89ab-cdef-012345678901
-greet("World")
-
-# ╔═╡ def01234-5678-9abc-def0-123456789012
-md"""
-### Working with Arrays
-"""
-
-# ╔═╡ ef012345-6789-abcd-ef01-234567890123
-begin
-    # Creating arrays
-    numbers = [1, 2, 3, 4, 5]
-
-    # Array comprehensions
-    squares = [x^2 for x in numbers]
-
-    # Broadcasting (element-wise operations)
-    doubled = 2 .* numbers
-
-    # Display results
-    (numbers=numbers, squares=squares, doubled=doubled)
-end
-
-# ╔═╡ f0123456-789a-bcde-f012-345678901234
-md"""
-### Multiple Dispatch in Action
-"""
-
-# ╔═╡ 01234567-89ab-cdef-0123-456789abcdef
-begin
-    # Define a function with multiple methods
-    process(x::Int) = "Processing integer: $x"
-    process(x::Float64) = "Processing float: $x"
-    process(x::String) = "Processing string: $x"
-    process(x::Vector) = "Processing vector of length $(length(x))"
-
-    # Test different types
-    results = [
-        process(42),
-        process(3.14),
-        process("Julia"),
-        process([1, 2, 3])
-    ]
-end
-
-# ╔═╡ 12345678-9abc-def0-1234-56789abcdef0
-md"""
-## 🎯 Next Steps
-
-### Recommended Learning Path
-
-1. **Week 1: Basics**
-   - Work through "Introduction to Julia" notebook
-   - Practice with arrays and functions
-   - Join Julia Slack
-
-2. **Week 2: Packages**
-   - Explore Plots.jl for visualization
-   - Try DataFrames.jl for data manipulation
-   - Create your first environment
-
-3. **Week 3: Performance**
-   - Learn about type stability
-   - Use BenchmarkTools.jl
-   - Profile your code
-
-4. **Week 4: Domain-Specific**
-   - DifferentialEquations.jl for ODEs/PDEs
-   - Flux.jl for machine learning
-   - JuMP.jl for optimization
-   - Catalyst.jl for biological modeling
-
-### Workshop Materials
-Continue with these notebooks from the workshop:
-- Introduction to Julia for Scientific Computing
-- Mathematical Modeling with Julia
-- Symbolic-Numeric Computing with ModelingToolkit
-- Parameter Estimation and Inverse Problems
-- Scientific Machine Learning
-
-### Remember
-- **Ask questions** - The community is helpful!
-- **Read error messages** - They're informative
-- **Start simple** - Build complexity gradually
-- **Have fun** - Julia makes programming enjoyable!
-"""
-
-# ╔═╡ 23456789-abcd-ef01-2345-6789abcdef01
-md"""
-## 💡 Tips and Tricks
-
-### REPL Productivity
-- **Tab completion:** Type partial names and press Tab
-- **History:** Use ↑/↓ arrows to navigate command history
-- **Shell mode:** Type `;` to run shell commands
-- **Package mode:** Type `]` for package management
-- **Help mode:** Type `?` for documentation
-
-### Performance Quick Wins
-1. **Put code in functions** - Global scope is slow
-2. **Use `@time` and `@benchmark`** - Measure performance
-3. **Avoid type instability** - Consistent types = fast code
-4. **Preallocate arrays** - Reuse memory when possible
-
-### Common Gotchas
-- **1-based indexing** - Arrays start at 1, not 0
-- **Column-major order** - Julia stores arrays column-first
-- **Type annotations** - Usually not needed, compiler infers types
-- **Mutation convention** - Functions ending in `!` modify arguments
-
-### Unicode Support
-Julia supports Unicode! Use `\alpha<TAB>` in the REPL:
-- α, β, γ... for math symbols
-- ∈, ⊆, ∪... for set operations
-- ≈ for `isapprox`
-- π for pi
-"""
-
 # ╔═╡ 3456789a-bcde-f012-3456-789abcdef012
 md"""
 ---
-*This notebook is part of the MACSYS Julia Workshop. For more materials, visit the [workshop repository](https://github.com/SciML/Julia_Modeling_Workshop).*
+*This notebook is part of the Julia Modeling Workshop. For more materials, visit the [workshop repository](https://github.com/SciML/Julia_Modeling_Workshop).*
 """
 
 # ╔═╡ Cell order:
@@ -412,13 +282,4 @@ md"""
 # ╟─7890abcd-ef12-3456-789a-bcdef1234567
 # ╟─890abcde-f123-4567-89ab-cdef12345678
 # ╟─9abcdef0-1234-5678-9abc-def012345678
-# ╟─abcdef01-2345-6789-abcd-ef0123456789
-# ╠═bcdef012-3456-789a-bcde-f01234567890
-# ╠═cdef0123-4567-89ab-cdef-012345678901
-# ╟─def01234-5678-9abc-def0-123456789012
-# ╠═ef012345-6789-abcd-ef01-234567890123
-# ╟─f0123456-789a-bcde-f012-345678901234
-# ╠═01234567-89ab-cdef-0123-456789abcdef
-# ╟─12345678-9abc-def0-1234-56789abcdef0
-# ╟─23456789-abcd-ef01-2345-6789abcdef01
-# ╟─3456789a-bcde-f012-3456-789abcdef012
+# ╠═3456789a-bcde-f012-3456-789abcdef012

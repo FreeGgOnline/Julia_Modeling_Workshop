@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.3
+# v0.20.18
 
 using Markdown
 using InteractiveUtils
@@ -13,6 +13,201 @@ begin
     using SparseArrays
     using BenchmarkTools
     using StaticArrays
+end
+
+# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000006
+with_terminal() do
+    println("Column-major iteration:")
+    @btime col_major_sum($A_test)
+    println("\nRow-major iteration:")
+    @btime row_major_sum($A_test)
+end
+
+# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000008
+begin
+    # Broadcasting examples
+    x_vec = [1, 2, 3]
+    y_vec = [4, 5, 6]'  # Row vector (1×3)
+
+    # Broadcasting automatically handles dimension expansion
+    broadcast_result = x_vec .+ y_vec
+end
+
+# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000010
+begin
+    function unfused_operations(x, y, z)
+        tmp1 = x .+ y
+        tmp2 = tmp1 .* z
+        return sin.(tmp2)
+    end
+
+    function fused_operations(x, y, z)
+        return sin.((x .+ y) .* z)
+    end
+
+    # Or using @. macro for automatic broadcasting
+    function fused_with_macro(x, y, z)
+        @. sin((x + y) * z)
+    end
+
+    test_x = rand(1000)
+    test_y = rand(1000)
+    test_z = rand(1000)
+end
+
+# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000011
+with_terminal() do
+    println("Unfused operations:")
+    @btime unfused_operations($test_x, $test_y, $test_z)
+    println("\nFused operations:")
+    @btime fused_operations($test_x, $test_y, $test_z)
+    println("\nFused with @. macro:")
+    @btime fused_with_macro($test_x, $test_y, $test_z)
+end
+
+# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000018
+begin
+    # Create a sparse matrix
+    n = 1000
+    # Create a tridiagonal matrix
+    sparse_mat = spdiagm(-1 => ones(n-1), 0 => -2*ones(n), 1 => ones(n-1))
+
+    # Convert to dense for comparison
+    dense_mat = Matrix(sparse_mat)
+
+    # Random vector for multiplication
+    sparse_vec = rand(n)
+end
+
+# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000019
+with_terminal() do
+    println("Memory usage:")
+    println("Sparse: ", Base.summarysize(sparse_mat), " bytes")
+    println("Dense: ", Base.summarysize(dense_mat), " bytes")
+
+    println("\nMatrix-vector multiplication:")
+    println("Sparse:")
+    @btime $sparse_mat * $sparse_vec
+    println("Dense:")
+    @btime $dense_mat * $sparse_vec
+end
+
+# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000021
+begin
+    # Different ways to build sparse matrices
+    I_idx = [1, 2, 3, 4, 5]
+    J_idx = [1, 2, 3, 4, 5]
+    V_vals = [1.0, 2.0, 3.0, 4.0, 5.0]
+
+    # Using sparse constructor
+    S1 = sparse(I_idx, J_idx, V_vals, 5, 5)
+
+    # Using spzeros and setting values
+    S2 = spzeros(5, 5)
+    for (i, j, v) in zip(I_idx, J_idx, V_vals)
+        S2[i, j] = v
+    end
+
+    S1
+end
+
+# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000023
+begin
+    # Static arrays vs regular arrays
+    regular_vec = [1.0, 2.0, 3.0]
+    static_vec = SVector(1.0, 2.0, 3.0)
+
+    regular_mat = [1.0 2.0; 3.0 4.0]
+    static_mat = SMatrix{2,2}(1.0, 3.0, 2.0, 4.0)
+
+    function sum_regular(x, y)
+        return x + y
+    end
+
+    function sum_static(x::SVector, y::SVector)
+        return x + y
+    end
+end
+
+# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000024
+with_terminal() do
+    println("Regular array addition:")
+    @btime sum_regular($regular_vec, $regular_vec)
+    println("\nStatic array addition:")
+    @btime sum_static($static_vec, $static_vec)
+end
+
+# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000026
+begin
+    # Example: 3D rotation matrices
+    function rotate_3d(θ)
+        return SMatrix{3,3}(
+            cos(θ), -sin(θ), 0,
+            sin(θ), cos(θ), 0,
+            0, 0, 1
+        )
+    end
+
+    point_3d = SVector(1.0, 0.0, 0.0)
+    rotated = rotate_3d(π/4) * point_3d
+end
+
+# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000028
+begin
+    large_array = rand(1000, 1000)
+
+    # Copying vs viewing
+    function process_with_copy(A)
+        sub = A[1:100, 1:100]  # Creates a copy
+        return sum(sub)
+    end
+
+    function process_with_view(A)
+        sub = @view A[1:100, 1:100]  # Creates a view
+        return sum(sub)
+    end
+end
+
+# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000029
+with_terminal() do
+    println("Processing with copy:")
+    @btime process_with_copy($large_array)
+    println("\nProcessing with view:")
+    @btime process_with_view($large_array)
+end
+
+# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000033
+begin
+    # Example: Circular buffer array
+    struct CircularArray{T} <: AbstractVector{T}
+        data::Vector{T}
+        start::Ref{Int}
+
+        CircularArray{T}(n::Int) where T = new(Vector{T}(undef, n), Ref(1))
+    end
+
+    Base.size(c::CircularArray) = size(c.data)
+    Base.getindex(c::CircularArray, i::Int) = c.data[mod1(c.start[] + i - 1, length(c.data))]
+
+    function Base.setindex!(c::CircularArray, v, i::Int)
+        c.data[mod1(c.start[] + i - 1, length(c.data))] = v
+    end
+
+    function rotate!(c::CircularArray, n::Int)
+        c.start[] = mod1(c.start[] + n, length(c.data))
+    end
+
+    # Create and use circular array
+    circ = CircularArray{Int}(5)
+    for i in 1:5
+        circ[i] = i
+    end
+
+    md"""
+    Circular array example:
+    - Initial: [1, 2, 3, 4, 5]
+    - After rotating by 2, accessing element 1 gives: $(begin rotate!(circ, 2); circ[1] end)
+    """
 end
 
 # ╔═╡ 1a2b3c4d-0000-0000-0000-000000000002
@@ -69,14 +264,6 @@ md"""
 Compare performance of column-major vs row-major access:
 """
 
-# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000006
-with_terminal() do
-    println("Column-major iteration:")
-    @btime col_major_sum($A_test)
-    println("\nRow-major iteration:")
-    @btime row_major_sum($A_test)
-end
-
 # ╔═╡ 1a2b3c4d-0000-0000-0000-000000000007
 md"""
 ## 2. Broadcasting and Vectorization
@@ -84,54 +271,12 @@ md"""
 Broadcasting allows element-wise operations on arrays of different shapes efficiently.
 """
 
-# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000008
-begin
-    # Broadcasting examples
-    x_vec = [1, 2, 3]
-    y_vec = [4, 5, 6]'  # Row vector (1×3)
-
-    # Broadcasting automatically handles dimension expansion
-    broadcast_result = x_vec .+ y_vec
-end
-
 # ╔═╡ 1a2b3c4d-0000-0000-0000-000000000009
 md"""
 ### Fusion of Broadcast Operations
 
 Julia can fuse multiple broadcast operations into a single loop for efficiency:
 """
-
-# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000010
-begin
-    function unfused_operations(x, y, z)
-        tmp1 = x .+ y
-        tmp2 = tmp1 .* z
-        return sin.(tmp2)
-    end
-
-    function fused_operations(x, y, z)
-        return sin.((x .+ y) .* z)
-    end
-
-    # Or using @. macro for automatic broadcasting
-    function fused_with_macro(x, y, z)
-        @. sin((x + y) * z)
-    end
-
-    test_x = rand(1000)
-    test_y = rand(1000)
-    test_z = rand(1000)
-end
-
-# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000011
-with_terminal() do
-    println("Unfused operations:")
-    @btime unfused_operations($test_x, $test_y, $test_z)
-    println("\nFused operations:")
-    @btime fused_operations($test_x, $test_y, $test_z)
-    println("\nFused with @. macro:")
-    @btime fused_with_macro($test_x, $test_y, $test_z)
-end
 
 # ╔═╡ 1a2b3c4d-0000-0000-0000-000000000012
 md"""
@@ -206,56 +351,10 @@ md"""
 For matrices with mostly zeros, sparse representations save memory and computation:
 """
 
-# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000018
-begin
-    # Create a sparse matrix
-    n = 1000
-    # Create a tridiagonal matrix
-    sparse_mat = spdiagm(-1 => ones(n-1), 0 => -2*ones(n), 1 => ones(n-1))
-
-    # Convert to dense for comparison
-    dense_mat = Matrix(sparse_mat)
-
-    # Random vector for multiplication
-    sparse_vec = rand(n)
-end
-
-# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000019
-with_terminal() do
-    println("Memory usage:")
-    println("Sparse: ", Base.summarysize(sparse_mat), " bytes")
-    println("Dense: ", Base.summarysize(dense_mat), " bytes")
-
-    println("\nMatrix-vector multiplication:")
-    println("Sparse:")
-    @btime $sparse_mat * $sparse_vec
-    println("Dense:")
-    @btime $dense_mat * $sparse_vec
-end
-
 # ╔═╡ 1a2b3c4d-0000-0000-0000-000000000020
 md"""
 ### Sparse Matrix Construction Patterns
 """
-
-# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000021
-begin
-    # Different ways to build sparse matrices
-    I_idx = [1, 2, 3, 4, 5]
-    J_idx = [1, 2, 3, 4, 5]
-    V_vals = [1.0, 2.0, 3.0, 4.0, 5.0]
-
-    # Using sparse constructor
-    S1 = sparse(I_idx, J_idx, V_vals, 5, 5)
-
-    # Using spzeros and setting values
-    S2 = spzeros(5, 5)
-    for (i, j, v) in zip(I_idx, J_idx, V_vals)
-        S2[i, j] = v
-    end
-
-    S1
-end
 
 # ╔═╡ 1a2b3c4d-0000-0000-0000-000000000022
 md"""
@@ -263,32 +362,6 @@ md"""
 
 StaticArrays provide stack-allocated arrays with compile-time known sizes:
 """
-
-# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000023
-begin
-    # Static arrays vs regular arrays
-    regular_vec = [1.0, 2.0, 3.0]
-    static_vec = SVector(1.0, 2.0, 3.0)
-
-    regular_mat = [1.0 2.0; 3.0 4.0]
-    static_mat = SMatrix{2,2}(1.0, 3.0, 2.0, 4.0)
-
-    function sum_regular(x, y)
-        return x + y
-    end
-
-    function sum_static(x::SVector, y::SVector)
-        return x + y
-    end
-end
-
-# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000024
-with_terminal() do
-    println("Regular array addition:")
-    @btime sum_regular($regular_vec, $regular_vec)
-    println("\nStatic array addition:")
-    @btime sum_static($static_vec, $static_vec)
-end
 
 # ╔═╡ 1a2b3c4d-0000-0000-0000-000000000025
 md"""
@@ -301,51 +374,12 @@ Static arrays are beneficial when:
 - You want to avoid heap allocations
 """
 
-# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000026
-begin
-    # Example: 3D rotation matrices
-    function rotate_3d(θ)
-        return SMatrix{3,3}(
-            cos(θ), -sin(θ), 0,
-            sin(θ), cos(θ), 0,
-            0, 0, 1
-        )
-    end
-
-    point_3d = SVector(1.0, 0.0, 0.0)
-    rotated = rotate_3d(π/4) * point_3d
-end
-
 # ╔═╡ 1a2b3c4d-0000-0000-0000-000000000027
 md"""
 ## 6. Views and Memory Efficiency
 
 Views provide a way to work with subarrays without copying data:
 """
-
-# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000028
-begin
-    large_array = rand(1000, 1000)
-
-    # Copying vs viewing
-    function process_with_copy(A)
-        sub = A[1:100, 1:100]  # Creates a copy
-        return sum(sub)
-    end
-
-    function process_with_view(A)
-        sub = @view A[1:100, 1:100]  # Creates a view
-        return sum(sub)
-    end
-end
-
-# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000029
-with_terminal() do
-    println("Processing with copy:")
-    @btime process_with_copy($large_array)
-    println("\nProcessing with view:")
-    @btime process_with_view($large_array)
-end
 
 # ╔═╡ 1a2b3c4d-0000-0000-0000-000000000030
 md"""
@@ -381,40 +415,6 @@ md"""
 
 Julia allows defining custom array types for specialized behavior:
 """
-
-# ╔═╡ 1a2b3c4d-0000-0000-0000-000000000033
-begin
-    # Example: Circular buffer array
-    struct CircularArray{T} <: AbstractVector{T}
-        data::Vector{T}
-        start::Ref{Int}
-
-        CircularArray{T}(n::Int) where T = new(Vector{T}(undef, n), Ref(1))
-    end
-
-    Base.size(c::CircularArray) = size(c.data)
-    Base.getindex(c::CircularArray, i::Int) = c.data[mod1(c.start[] + i - 1, length(c.data))]
-
-    function Base.setindex!(c::CircularArray, v, i::Int)
-        c.data[mod1(c.start[] + i - 1, length(c.data))] = v
-    end
-
-    function rotate!(c::CircularArray, n::Int)
-        c.start[] = mod1(c.start[] + n, length(c.data))
-    end
-
-    # Create and use circular array
-    circ = CircularArray{Int}(5)
-    for i in 1:5
-        circ[i] = i
-    end
-
-    md"""
-    Circular array example:
-    - Initial: [1, 2, 3, 4, 5]
-    - After rotating by 2, accessing element 1 gives: $(begin rotate!(circ, 2); circ[1] end)
-    """
-end
 
 # ╔═╡ 1a2b3c4d-0000-0000-0000-000000000034
 md"""
