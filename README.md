@@ -21,11 +21,12 @@ Then simply paste the URLs below into the URL bar and hit enter. Then click "Edi
 
 The notebooks for the workshop are available at the following URLs:
 
-* [Introduction to Julia for People Who Already Do Scientific Computing]()
-* [Introduction to Mathematical Modeling in Julia: Numerical Solvers for Differential Equations and Nonlinear Systems](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Forward_Modeling.jl)
-* [Symbolic-Numeric Model Definitions with Symbolics.jl and ModelingToolkit.jl]()
-* [Solving Inverse Problems and Parameter Estimation with Julia's SciML]()
-* [Scientific Machine Learning (SciML) and Equation Discovery with Julia]()
+* [Introduction to Julia for People Who Already Do Scientific Computing](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Introduction_to_Julia.jl)
+* [Introduction to Mathematical Modeling in Julia: Numerical Solvers for Differential Equations and Nonlinear Systems](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Introduction_Mathematical_Modeling_Julia.jl)
+* [Symbolic-Numeric Model Definitions with Symbolics.jl and ModelingToolkit.jl](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Symbolic_Numeric_ModelingToolkit.jl)
+* [Introduction to Biological Modeling with Catalyst.jl](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Introduction_to_Catalyst.jl)
+* [Solving Inverse Problems and Parameter Estimation with Julia's SciML](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Solving_Inverse_Problems_Julia.jl)
+* [Scientific Machine Learning (SciML) and Equation Discovery with Julia](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Missing_Physics_UDE.jl)
 
 ## Pre-Built Notebook HTMLs
 
@@ -34,6 +35,7 @@ If you would like to view the notebook files without having to run them locally,
 * [Introduction to Julia for People Who Already Do Scientific Computing]()
 * [Introduction to Mathematical Modeling in Julia]()
 * [Symbolic-Numeric Model Definitions with Symbolics.jl and ModelingToolkit.jl]()
+* [Introduction to Biological Modeling with Catalyst.jl]()
 * [Solving Inverse Problems and Parameter Estimation with Julia's SciML]()
 * [Scientific Machine Learning (SciML) and Equation Discovery with Julia]()
 
@@ -106,9 +108,16 @@ Note: when you first make this notebook live, it will download all of the requir
 * Solving Differential Equations with DifferentialEquations.jl
 * Finding Steady States with NonlinearSolve.jl
 
-## Symoblic-Numeric 
-* Biological Modeling with Catalyst.jl
-* Symbolically Analyzing Models with ModelingToolkit.jl
+## Symbolic-Numeric Model Definitions with Symbolics.jl and ModelingToolkit.jl (Optional)
+
+* Symbolic Computing in Julia with Symbolics.jl
+* Symbolically Building and Analyzing Models with ModelingToolkit.jl
+
+## Introduction to Biological Modeling with Catalyst.jl
+
+* Defining Reaction Networks with Catalyst.jl
+* Simulating Reaction Networks with DifferentialEquations.jl (ODEs and SDEs)
+* Using JumpProcesses.jl for Stochastic Simulation Algorithms (Gillespie-type methods)
 
 ## Solving Inverse Problems and Parameter Estimation with Julia's SciML
 
