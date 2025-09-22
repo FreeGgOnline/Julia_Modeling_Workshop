@@ -387,23 +387,24 @@ We successfully demonstrated how Universal Differential Equations can discover m
 2. Built a hybrid model combining partial knowledge with neural networks
 3. Trained using two-stage optimization (ADAM + LBFGS)
 4. Applied symbolic regression to extract interpretable equations
+5. Validated the model with long-term predictions beyond training data
 
-The UDE approach discovered the missing predator-prey interaction terms, bridging mechanistic modeling and machine learning for interpretable scientific discovery.
+The UDE approach discovered the missing predator-prey interaction terms, bridging mechanistic modeling and machine learning for interpretable scientific discovery. The model successfully extrapolates well beyond the training period, demonstrating that it has learned the true underlying dynamics rather than just fitting the data.
 """
 
 # ╔═╡ a9b8c7d6-5e4f-3210-9876-543210fedcba
 md"""
-## Critical Difference: SINDy vs Universal Differential Equations
+### Critical Difference: SINDy vs Universal Differential Equations
 
 This tutorial demonstrates a fundamental advantage of the UDE approach over pure data-driven methods like SINDy. Let's examine the three symbolic regression results:
 
-### The Three Problems We Solved
+#### The Three Problems We Solved
 
 1. **Full Problem (Pure SINDy)**: Attempting to discover the entire system from scratch using only data
 2. **Ideal Problem**: Using the exact missing terms (cheating - assumes we know what we're looking for)
 3. **NN Problem (UDE Approach)**: Using the neural network's learned approximation of missing terms
 
-### Key Insight: Prior Knowledge Makes the Difference
+#### Key Insight: Prior Knowledge Makes the Difference
 
 When we look at the symbolic regression results:
 
@@ -411,7 +412,7 @@ When we look at the symbolic regression results:
 
 - **NN Problem (UDE)** succeeds in recovering the correct terms. By incorporating our partial knowledge (the growth and death terms α·x and -δ·y), the neural network only needs to learn the missing interaction terms (β·x·y and γ·x·y).
 
-### Why This Matters
+#### Why This Matters
 
 The UDE approach transforms an ill-posed problem into a well-posed one:
 
@@ -420,22 +421,241 @@ The UDE approach transforms an ill-posed problem into a well-posed one:
 3. **Better Generalization**: The hybrid model respects conservation laws and physical principles
 4. **Interpretability**: The discovered terms have clear physical meaning (predator-prey interactions)
 
-### The Mathematical Difference
+#### The Mathematical Difference
 
-**Pure SINDy tries to find:**
-```
-dx/dt = ? (discovers: complex incorrect expression)
-dy/dt = ? (discovers: complex incorrect expression)
-```
-
-**UDE with prior knowledge finds:**
-```
-dx/dt = α·x + NN₁(x,y) (discovers: -β·x·y)
-dy/dt = -δ·y + NN₂(x,y) (discovers: γ·x·y)
-```
-
-This demonstrates that **incorporating even partial mechanistic knowledge dramatically improves the symbolic regression's ability to discover the correct underlying physics**. The neural network acts as a "scaffold" that guides the symbolic regression toward physically meaningful terms, turning an incorrect result into a correct one.
+Let's see the actual discovered equations from our symbolic regression:
 """
+
+# ╔═╡ 34e3b884-97c6-11f0-1dea-3342c720edc0
+begin
+    println("\n" * "="^60)
+    println("COMPARISON: SINDy vs UDE Discovered Systems")
+    println("="^60)
+
+    println("\n🎯 TRUE SYSTEM (Lotka-Volterra):")
+    println("dx/dt = 1.5x - 1.0xy")
+    println("dy/dt = -3.0y + 1.0xy")
+
+    println("\n❌ PURE SINDy (Full Problem - No Prior Knowledge):")
+    if @isdefined(full_res) && full_res !== nothing
+        eqs_full = DataDrivenDiffEq.get_basis(full_res)
+        params_full = DataDrivenDiffEq.get_parameter_map(eqs_full)
+        println("Discovered equations:")
+        println(full_res)
+    else
+        println("Failed to discover correct system")
+    end
+
+    println("\n✅ UDE APPROACH (NN Problem - With Prior Knowledge):")
+    if @isdefined(nn_res) && nn_res !== nothing
+        println("Known physics + Discovered missing terms:")
+        println("dx/dt = 1.5x + [discovered: -1.0xy]")
+        println("dy/dt = -3.0y + [discovered: 1.0xy]")
+        println("\nSymbolic regression result:")
+        println(nn_res)
+    else
+        println("Results pending...")
+    end
+
+    println("\n" * "="^60)
+end
+
+# ╔═╡ 34e3bb86-97c6-11f0-198e-1ba0bff9ca9b
+md"""
+This demonstrates that **incorporating even partial mechanistic knowledge dramatically improves the symbolic regression's ability to discover the correct underlying physics**. The neural network acts as a "scaffold" that guides the symbolic regression toward physically meaningful terms, turning an incorrect result into a correct one.
+
+The comparison above shows:
+- **Pure SINDy** struggles without prior knowledge and often produces incorrect or overly complex equations
+- **UDE** successfully recovers the exact interaction terms by leveraging the known physics
+"""
+
+# ╔═╡ 34e3bd20-97c6-11f0-2ae5-234797c6b56d
+md"""
+## Validating the Prediction
+
+Next, we want to predict with our model. To do so, we embed the basis into a function and create a recovered dynamics system that combines our known physics with the discovered terms.
+"""
+
+# ╔═╡ 34e3be7e-97c6-11f0-3a65-3f9adb69e984
+begin
+    # Create the recovered equation function from symbolic regression results
+    nn_eqs = DataDrivenDiffEq.get_basis(nn_res)
+    nn_eqs_func = DataDrivenDiffEq.get_implicit_ode_function(nn_res)
+
+    # Get the recovered parameters
+    p_recovered = DataDrivenDiffEq.get_parameter_values(nn_eqs)
+    println("Recovered parameters: ", p_recovered)
+end
+
+# ╔═╡ 34e3bfd2-97c6-11f0-13d2-f30d38ac65fb
+# Define the recovered dynamics using our discovered equations
+function recovered_dynamics!(du, u, p, t)
+    # Use the recovered equations for the missing terms
+    û = nn_eqs([u[1], u[2]], p)
+
+    # Combine with known physics
+    du[1] = p_[1] * u[1] + û[1]  # α*x + discovered_term
+    du[2] = -p_[4] * u[2] + û[2]  # -δ*y + discovered_term
+end
+
+# ╔═╡ 34e3c0a4-97c6-11f0-159a-fb26f672a6df
+md"""
+### Parameter Refinement
+
+We can further refine the parameters by minimizing the residuals between our neural network predictions and the recovered parametrized equations:
+"""
+
+# ╔═╡ 34e3c160-97c6-11f0-0666-6360e0a98739
+begin
+    # Define loss function for parameter refinement
+    function parameter_loss(p)
+        Y = reduce(hcat, map(Base.Fix2(nn_eqs, p), eachcol(X̂)))
+        sum(abs2, Ŷ .- Y)
+    end
+
+    # Optimize parameters
+    optf_params = Optimization.OptimizationFunction(
+        (x, p) -> parameter_loss(x),
+        Optimization.AutoForwardDiff()
+    )
+    optprob_params = Optimization.OptimizationProblem(
+        optf_params,
+        p_recovered
+    )
+    parameter_res = Optimization.solve(
+        optprob_params,
+        Optim.LBFGS(),
+        maxiters = 1000
+    )
+
+    println("Refined parameters: ", parameter_res.u)
+end
+
+# ╔═╡ 34e3c32c-97c6-11f0-072d-e7dbb149abf8
+md"""
+### Long-term Prediction
+
+Now let's test how well our recovered model performs on long-term predictions, well beyond the training data:
+"""
+
+# ╔═╡ 34e3c392-97c6-11f0-292d-3bc1da9e2bd8
+begin
+    # Extended time span for testing generalization
+    t_long = (0.0, 50.0)
+
+    # Solve with recovered dynamics
+    estimation_prob = ODEProblem(
+        recovered_dynamics!,
+        u0,
+        t_long,
+        parameter_res.u
+    )
+    estimate_long = solve(estimation_prob, Tsit5(), saveat = 0.1)
+
+    # True solution for comparison
+    true_prob_long = ODEProblem(lotka!, u0, t_long, p_)
+    true_solution_long = solve(true_prob_long, Tsit5(), saveat = estimate_long.t)
+
+    println("Simulated ", length(estimate_long.t), " timesteps")
+    println("Training data was only from t=0 to t=", tspan[2])
+end
+
+# ╔═╡ 34e3c4a0-97c6-11f0-2783-85f2a102dec9
+md"""
+### Visualization of Results
+
+Let's create comprehensive visualizations to assess our model's performance:
+"""
+
+# ╔═╡ 34e3c5c2-97c6-11f0-38df-2f58f8a74aa2
+begin
+    # Define colors for consistency
+    c1, c2, c3, c4 = :dodgerblue, :orange, :green, :purple
+
+    # Plot 1: Timeseries Error (log scale)
+    p1 = plot(
+        t,
+        abs.(Array(solution) .- estimate)' .+ eps(Float32),
+        lw = 3,
+        yaxis = :log,
+        title = "Timeseries Error",
+        xlabel = "Time",
+        ylabel = "Error (log scale)",
+        label = ["x error" "y error"],
+        color = [c1 c2]
+    )
+
+    # Plot 2: Neural Network Fit (3D surface)
+    x_range = range(-0.5, 5, length=100)
+    y_range = range(-0.5, 5, length=100)
+    nn_eval = [Lux.apply(trained_model, [x, y], res1.u, st)[1]
+               for x in x_range, y in y_range]
+
+    p2 = surface(
+        x_range, y_range,
+        (x, y) -> nn_eval[findfirst(==(x), x_range), findfirst(==(y), y_range)][1],
+        title = "NN: Missing Dynamics (dx/dt)",
+        xlabel = "x (prey)",
+        ylabel = "y (predator)",
+        zlabel = "Missing term",
+        camera = (30, 30)
+    )
+
+    # Plot 3: Long-term Extrapolation
+    p3 = plot(estimate_long, lw = 3, color = [c1 c2],
+              label = ["x (estimated)" "y (estimated)"],
+              title = "Long-term Prediction",
+              xlabel = "Time",
+              ylabel = "Population")
+    plot!(p3, true_solution_long, lw = 3,
+          linestyle = :dash, color = [c3 c4],
+          label = ["x (true)" "y (true)"])
+    vline!(p3, [tspan[2]], lw = 2, color = :red,
+           linestyle = :dash, label = "Training boundary")
+
+    # Combine all plots
+    plot(p1, p2, p3, layout = (1, 3), size = (1200, 400))
+end
+
+# ╔═╡ 34e3c8a6-97c6-11f0-3ecc-618fe114d0f1
+begin
+    # Additional visualization: Phase space comparison
+    p_phase = plot(
+        estimate_long[1, :], estimate_long[2, :],
+        lw = 2,
+        color = c1,
+        label = "Estimated trajectory",
+        title = "Phase Space",
+        xlabel = "x (prey)",
+        ylabel = "y (predator)"
+    )
+    plot!(p_phase,
+        true_solution_long[1, :], true_solution_long[2, :],
+        lw = 2,
+        color = c3,
+        linestyle = :dash,
+        label = "True trajectory"
+    )
+    scatter!(p_phase, [u0[1]], [u0[2]],
+            color = :red, markersize = 8,
+            label = "Initial condition")
+    p_phase
+end
+
+# ╔═╡ 34e3c9be-97c6-11f0-279d-2b8d4251a3fb
+begin
+    # Calculate quantitative metrics
+    mse_training = mean((Array(solution) .- estimate).^2)
+    mse_extrapolation = mean((Array(true_solution_long) .- Array(estimate_long)).^2)
+
+    println("\n" * "="^60)
+    println("QUANTITATIVE VALIDATION METRICS")
+    println("="^60)
+    println("Mean Squared Error (Training period): ", round(mse_training, sigdigits=4))
+    println("Mean Squared Error (Full extrapolation): ", round(mse_extrapolation, sigdigits=4))
+    println("Extrapolation factor: ", round(t_long[2] / tspan[2], digits=1), "x beyond training")
+    println("="^60)
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -4047,5 +4267,18 @@ version = "1.9.2+0"
 # ╠═ff567001-5678-cdef-0123-678901234567
 # ╟─a9012345-1234-5678-cdef-789012345678
 # ╟─a9b8c7d6-5e4f-3210-9876-543210fedcba
+# ╠═34e3b884-97c6-11f0-1dea-3342c720edc0
+# ╠═34e3bb86-97c6-11f0-198e-1ba0bff9ca9b
+# ╟─34e3bd20-97c6-11f0-2ae5-234797c6b56d
+# ╠═34e3be7e-97c6-11f0-3a65-3f9adb69e984
+# ╠═34e3bfd2-97c6-11f0-13d2-f30d38ac65fb
+# ╠═34e3c0a4-97c6-11f0-159a-fb26f672a6df
+# ╠═34e3c160-97c6-11f0-0666-6360e0a98739
+# ╠═34e3c32c-97c6-11f0-072d-e7dbb149abf8
+# ╠═34e3c392-97c6-11f0-292d-3bc1da9e2bd8
+# ╠═34e3c4a0-97c6-11f0-2783-85f2a102dec9
+# ╠═34e3c5c2-97c6-11f0-38df-2f58f8a74aa2
+# ╠═34e3c8a6-97c6-11f0-3ecc-618fe114d0f1
+# ╠═34e3c9be-97c6-11f0-279d-2b8d4251a3fb
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

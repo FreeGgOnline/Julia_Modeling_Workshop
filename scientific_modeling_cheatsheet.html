@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scientific Modeling Cheatsheet – MATLAB–Python–Julia</title>
+    <title>Scientific Modeling Cheatsheet – MATLAB – Python – Julia Quick Reference</title>
     <style>
         * {
             margin: 0;
@@ -709,7 +709,9 @@ end</code></td>
                         <td>Solve system</td>
                         <td><code>[t, y] = ode45(@mysys, [0, 20], [1; 0])</code></td>
                         <td><code>sol = solve_ivp(mysys, [0, 20], [1, 0])</code></td>
-                        <td><code>prob = ODEProblem(mysys!, [1.0, 0.0], (0.0, 20.0))
+                        <td><code>u0 = [1.0, 0.0]
+tspan = (0.0, 20.0)
+prob = ODEProblem(mysys!, u0, tspan)
 sol = solve(prob)</code></td>
                     </tr>
                     <tr>
@@ -816,7 +818,8 @@ prob = DAEProblem(residual!, du0, u0, tspan,
 [t, y] = ode15i(@implicitdae, [0 10], y0, yp0)</code></td>
                         <td><code># Would require Assimulo installation
 # and IDA solver setup</code></td>
-                        <td><code>sol = solve(prob, IDA())
+                        <td><code>using Sundials
+sol = solve(prob, IDA())
 # or DFBDF() for stiff DAEs</code></td>
                     </tr>
                 </tbody>
@@ -957,8 +960,10 @@ sol = solve(prob, Optim.LBFGS())</code></td>
                     </tr>
                     <tr>
                         <td>With gradient</td>
-                        <td><code>options = optimoptions('fminunc','GradObj','on');
-x = fminunc(@(x) deal(f(x), grad(x)), x0, options)</code></td>
+                        <td><code>options = optimoptions('fminunc',
+                       'GradObj','on');
+x = fminunc(@(x) deal(f(x), grad(x)),
+            x0, options)</code></td>
                         <td><code>def grad(x):
     return np.array([2*x[0], 2*x[1]])
 res = minimize(f, x0, jac=grad)</code></td>
@@ -1686,12 +1691,17 @@ y = f(x)
 v = torch.tensor([1.0, 0.0, 1.0])  # cotangent vector
 y.backward(v)
 vjp = x.grad  # v^T * J</code></td>
-                        <td><code>f!(y, x) = (y[1] = x[1]^2; y[2] = x[1]*x[2]; y[3] = x[2]^2)
+                        <td><code>function f!(y, x)
+    y[1] = x[1]^2
+    y[2] = x[1]*x[2]
+    y[3] = x[2]^2
+end
 x = [2.0, 3.0]
 y = zeros(3)
 dx = zeros(2)
 dy = [1.0, 0.0, 1.0]  # cotangent vector
-autodiff(Reverse, f!, Const, Duplicated(y, dy), Duplicated(x, dx))
+autodiff(Reverse, f!, Const,
+         Duplicated(y, dy), Duplicated(x, dx))
 # dx contains v^T * J</code></td>
                     </tr>
                     <tr>
@@ -1738,15 +1748,19 @@ autodiff(Reverse, f!, Const, Duplicated(y, dy), Duplicated(x, dx))
                     <tr>
                         <td>Define ODE system (Cartesian pendulum)</td>
                         <td><code>% Use Simulink or write function</code></td>
-                        <td><code># Use CasADi for DAE support
-import casadi as ca
+                        <td><code>import casadi as ca
 
-x, y, vx, vy, lam = ca.SX.sym('x'), ca.SX.sym('y'), \
-    ca.SX.sym('vx'), ca.SX.sym('vy'), ca.SX.sym('lam')
+x = ca.SX.sym('x')
+y = ca.SX.sym('y')
+vx = ca.SX.sym('vx')
+vy = ca.SX.sym('vy')
+lam = ca.SX.sym('lam')
 
-dae = {'x': ca.vertcat(x, y, vx, vy, lam),
-       'ode': ca.vertcat(vx, vy, -lam*x, -lam*y - 9.81),
-       'alg': x**2 + y**2 - 1}</code></td>
+states = ca.vertcat(x, y, vx, vy, lam)
+odes = ca.vertcat(vx, vy, -lam*x, -lam*y - 9.81)
+algs = x**2 + y**2 - 1
+
+dae = {'x': states, 'ode': odes, 'alg': algs}</code></td>
                         <td><code>using ModelingToolkit
 
 @parameters t g L
@@ -1771,9 +1785,12 @@ pendulum_simplified = mtkcompile(pendulum)</code></td>
                     <tr>
                         <td>Transient simulation</td>
                         <td><code>% Create function handle and solve</code></td>
-                        <td><code>F = ca.Function('F', [x, p], [dx])
-# Then integrate with solver</code></td>
-                        <td><code>u0 = [x => 1.0, y => 0.0, vx => 0.0, vy => 0.0]
+                        <td><code># Note: CasADi cannot directly solve
+# this DAE model - would need integrator
+# setup with algebraic constraints,
+# high index causes instability</code></td>
+                        <td><code>u0 = [x => 1.0, y => 0.0,
+      vx => 0.0, vy => 0.0]
 tspan = (0.0, 10.0)
 p = [g => 9.81, L => 1.0]
 
@@ -1788,7 +1805,8 @@ import casadi as ca
 # Create rootfinder for algebraic equations
 rf = ca.rootfinder('rf', 'newton', dae)
 sol = rf(x0, p)</code></td>
-                        <td><code>ss_prob = NonlinearProblem(pendulum_simplified, u0, p)
+                        <td><code>ss_prob = NonlinearProblem(
+    pendulum_simplified, u0, p)
 ss_sol = solve(ss_prob)</code></td>
                     </tr>
                     <tr>
@@ -1818,7 +1836,8 @@ latexify(pendulum)</code></td>
                         <td><code>% Use Simulink blocks</code></td>
                         <td><code># No direct equivalent
 # Consider PyMola or OpenModelica</code></td>
-                        <td><code>function Mass(; name, m = 1.0, x = 0.0, v = 0.0)
+                        <td><code>function Mass(; name, m = 1.0,
+              x = 0.0, v = 0.0)
     @parameters t
     @variables x(t) v(t) F(t)
     @parameters m
@@ -1853,7 +1872,7 @@ model = complete(model)</code></td>
                         <td>Simplify</td>
                         <td><code>% Simulink cannot simplify</code></td>
                         <td><code># Manual</code></td>
-                        <td><code>prob = mtkcompile(model, ODEProblem, u0, tspan, p)</code></td>
+                        <td><code>model_simplified = mtkcompile(model)</code></td>
                     </tr>
                 </tbody>
             </table>
