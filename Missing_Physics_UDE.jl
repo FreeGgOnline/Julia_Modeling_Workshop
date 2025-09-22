@@ -267,16 +267,15 @@ plot_loss = Plots.plot(losses, xlabel = "Iterations", ylabel = "Loss",
 # Plot the trained UDE trajectories
 tsample = 0.0:0.1:5.0
 
-# ╔═╡ c5678901-def0-1234-89ab-345678901234
-md"""
-## Step 5: Symbolic Regression - Discovering the Missing Physics
-
-Now we use symbolic regression to find interpretable equations from the trained neural network.
-"""
+# ╔═╡ ae456ff0-4567-bcde-f012-901234567890
+X̂ = predict(p_trained, Xₙ[:, 1], tsample)
 
 # ╔═╡ bf567001-5678-cdef-0123-012345678901
 # Trained on noisy data vs real solution
 plot_trajectory = Plots.plot(tsample, X̂[1, :], label = "Learned Prey", color = :blue)
+
+# ╔═╡ c0678112-6789-def0-1234-123456789012
+Plots.plot!(plot_trajectory, tsample, X̂[2, :], label = "Learned Predator", color = :orange)
 
 # ╔═╡ d1789223-789a-ef01-2345-234567890123
 Plots.scatter!(plot_trajectory, t, Xₙ[1, :], color = :blue, label = "Prey Data", alpha = 0.5)
@@ -288,8 +287,16 @@ Plots.scatter!(plot_trajectory, t, Xₙ[2, :], color = :orange, label = "Predato
 Plots.plot!(plot_trajectory, solution, color = :black, linestyle = :dash, alpha = 0.75,
            label = ["True Prey" "True Predator"], title = "Learned Dynamics vs True Solution")
 
-# ╔═╡ c0678112-6789-def0-1234-123456789012
-Plots.plot!(plot_trajectory, tsample, X̂[2, :], label = "Learned Predator", color = :orange)
+# ╔═╡ c5678901-def0-1234-89ab-345678901234
+md"""
+## Step 5: Symbolic Regression - Discovering the Missing Physics
+
+Now we use symbolic regression to find interpretable equations from the trained neural network.
+"""
+
+# ╔═╡ 9c383a32-d63d-4f0c-9063-3df5a8ebdc01
+# Use training data for symbolic regression
+X̂_train = Xₙ
 
 # ╔═╡ 477b579c-d3db-4c65-b290-6a51cb8bcbe5
 begin
@@ -298,9 +305,6 @@ begin
 	    Ŷ[:, i] = U(Xₙ[:, i], p_trained, st)[1]
 	end
 end
-
-# ╔═╡ 1ab8d108-571a-4ad3-aef0-dfb0e48e2250
-
 
 # ╔═╡ a4abc556-abcd-1234-5678-567890123456
 begin
@@ -369,7 +373,7 @@ nn_res = DataDrivenDiffEq.solve(nn_problem, basis, opt, options = options)
 for (name, res) in [("Full", full_res), ("Ideal", ideal_res), ("NN", nn_res)]
     println("\n=== $name Results ===")
     println(res)
-    println(DataDrivenDiffEq.get_parameter_map(res))
+    println(DataDrivenDiffEq.get_parameter_map(DataDrivenDiffEq.get_basis(res)))
     println()
 end
 
@@ -387,12 +391,51 @@ We successfully demonstrated how Universal Differential Equations can discover m
 The UDE approach discovered the missing predator-prey interaction terms, bridging mechanistic modeling and machine learning for interpretable scientific discovery.
 """
 
-# ╔═╡ ae456ff0-4567-bcde-f012-901234567890
-X̂ = predict(p_trained, Xₙ[:, 1], tsample)
+# ╔═╡ a9b8c7d6-5e4f-3210-9876-543210fedcba
+md"""
+## Critical Difference: SINDy vs Universal Differential Equations
 
-# ╔═╡ 9c383a32-d63d-4f0c-9063-3df5a8ebdc01
-# Use training data for symbolic regression
-X̂_train = Xₙ
+This tutorial demonstrates a fundamental advantage of the UDE approach over pure data-driven methods like SINDy. Let's examine the three symbolic regression results:
+
+### The Three Problems We Solved
+
+1. **Full Problem (Pure SINDy)**: Attempting to discover the entire system from scratch using only data
+2. **Ideal Problem**: Using the exact missing terms (cheating - assumes we know what we're looking for)
+3. **NN Problem (UDE Approach)**: Using the neural network's learned approximation of missing terms
+
+### Key Insight: Prior Knowledge Makes the Difference
+
+When we look at the symbolic regression results:
+
+- **Full Problem (Pure SINDy)** fails to correctly identify the system. Without any prior knowledge, SINDy must search through an enormous space of possible terms, leading to incorrect or overly complex equations.
+
+- **NN Problem (UDE)** succeeds in recovering the correct terms. By incorporating our partial knowledge (the growth and death terms α·x and -δ·y), the neural network only needs to learn the missing interaction terms (β·x·y and γ·x·y).
+
+### Why This Matters
+
+The UDE approach transforms an ill-posed problem into a well-posed one:
+
+1. **Reduced Search Space**: Instead of discovering 4 terms, we only need to discover 2
+2. **Physical Constraints**: The known physics acts as a strong regularization
+3. **Better Generalization**: The hybrid model respects conservation laws and physical principles
+4. **Interpretability**: The discovered terms have clear physical meaning (predator-prey interactions)
+
+### The Mathematical Difference
+
+**Pure SINDy tries to find:**
+```
+dx/dt = ? (discovers: complex incorrect expression)
+dy/dt = ? (discovers: complex incorrect expression)
+```
+
+**UDE with prior knowledge finds:**
+```
+dx/dt = α·x + NN₁(x,y) (discovers: -β·x·y)
+dy/dt = -δ·y + NN₂(x,y) (discovers: γ·x·y)
+```
+
+This demonstrates that **incorporating even partial mechanistic knowledge dramatically improves the symbolic regression's ability to discover the correct underlying physics**. The neural network acts as a "scaffold" that guides the symbolic regression toward physically meaningful terms, turning an incorrect result into a correct one.
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -435,7 +478,7 @@ Zygote = "~0.7.10"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.11.6"
+julia_version = "1.11.7"
 manifest_format = "2.0"
 project_hash = "22e146604d90a70ad00aa799a75dcd9bf251fd0a"
 
@@ -3988,7 +4031,6 @@ version = "1.9.2+0"
 # ╟─c5678901-def0-1234-89ab-345678901234
 # ╠═9c383a32-d63d-4f0c-9063-3df5a8ebdc01
 # ╠═477b579c-d3db-4c65-b290-6a51cb8bcbe5
-# ╠═1ab8d108-571a-4ad3-aef0-dfb0e48e2250
 # ╠═a4abc556-abcd-1234-5678-567890123456
 # ╠═5ab51fdf-bcb9-474a-8608-fc6dc96ea599
 # ╠═6589b8ab-c07d-4586-b82c-6e75565b1e57
@@ -4004,5 +4046,6 @@ version = "1.9.2+0"
 # ╠═18048779-0f36-4577-9aef-52f19c9d362b
 # ╠═ff567001-5678-cdef-0123-678901234567
 # ╟─a9012345-1234-5678-cdef-789012345678
+# ╟─a9b8c7d6-5e4f-3210-9876-543210fedcba
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
