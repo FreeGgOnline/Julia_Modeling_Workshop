@@ -116,7 +116,7 @@ p_ = [1.3, 0.9, 0.8, 1.8]
 prob = ODE.ODEProblem(lotka!, u0, tspan, p_)
 
 # ╔═╡ eabcd456-0123-789a-bcde-f01234567890
-solution = ODE.solve(prob, ODE.Vern7(), abstol = 1e-12, reltol = 1e-12, saveat = 0.25)
+solution = ODE.solve(prob, ODE.Vern7(), abstol = 1e-12, reltol = 1e-12, saveat = 0.1)
 
 # ╔═╡ d4e5f6a7-b890-1234-def0-234567890123
 # Add noise in terms of the mean
@@ -368,6 +368,9 @@ ideal_res = DataDrivenDiffEq.solve(ideal_problem, basis, opt, options = options)
 # ╔═╡ 18048779-0f36-4577-9aef-52f19c9d362b
 nn_res = DataDrivenDiffEq.solve(nn_problem, basis, opt, options = options)
 
+# ╔═╡ cce79c72-2b9b-4584-abf5-38b630dd8860
+nn_eqs = DataDrivenDiffEq.get_basis(nn_res)
+
 # ╔═╡ ff567001-5678-cdef-0123-678901234567
 # Display results
 for (name, res) in [("Full", full_res), ("Ideal", ideal_res), ("NN", nn_res)]
@@ -476,17 +479,6 @@ md"""
 Next, we want to predict with our model. To do so, we embed the basis into a function and create a recovered dynamics system that combines our known physics with the discovered terms.
 """
 
-# ╔═╡ 34e3be7e-97c6-11f0-3a65-3f9adb69e984
-begin
-    # Create the recovered equation function from symbolic regression results
-    nn_eqs = DataDrivenDiffEq.get_basis(nn_res)
-    nn_eqs_func = DataDrivenDiffEq.get_implicit_ode_function(nn_res)
-
-    # Get the recovered parameters
-    p_recovered = DataDrivenDiffEq.get_parameter_values(nn_eqs)
-    println("Recovered parameters: ", p_recovered)
-end
-
 # ╔═╡ 34e3bfd2-97c6-11f0-13d2-f30d38ac65fb
 # Define the recovered dynamics using our discovered equations
 function recovered_dynamics!(du, u, p, t)
@@ -505,26 +497,26 @@ md"""
 We can further refine the parameters by minimizing the residuals between our neural network predictions and the recovered parametrized equations:
 """
 
+# ╔═╡ 25d68afd-38f9-4f46-b773-b630e81eb332
+# Define loss function for parameter refinement
+function parameter_loss(p)
+	Y = reduce(hcat, map(Base.Fix2(DataDrivenDiffEq.get_basis(nn_res), p), eachcol(X̂)))
+	sum(abs2, Ŷ .- Y)
+end
+
 # ╔═╡ 34e3c160-97c6-11f0-0666-6360e0a98739
 begin
-    # Define loss function for parameter refinement
-    function parameter_loss(p)
-        Y = reduce(hcat, map(Base.Fix2(nn_eqs, p), eachcol(X̂)))
-        sum(abs2, Ŷ .- Y)
-    end
-
-    # Optimize parameters
-    optf_params = Optimization.OptimizationFunction(
+    optf_params = OPT.OptimizationFunction(
         (x, p) -> parameter_loss(x),
-        Optimization.AutoForwardDiff()
+        OPT.AutoForwardDiff()
     )
-    optprob_params = Optimization.OptimizationProblem(
-        optf_params,
-        p_recovered
+    optprob_params = OPT.OptimizationProblem(
+        optf_params, 
+		getindex.(DataDrivenDiffEq.get_parameter_map(DataDrivenDiffEq.get_basis(nn_res)),2),
     )
-    parameter_res = Optimization.solve(
+    parameter_res = OPT.solve(
         optprob_params,
-        Optim.LBFGS(),
+        OptimizationOptimJL.LBFGS(),
         maxiters = 1000
     )
 
@@ -538,27 +530,45 @@ md"""
 Now let's test how well our recovered model performs on long-term predictions, well beyond the training data:
 """
 
+# ╔═╡ 9b4b7fe9-2c96-4b63-8be8-e5aeadf6b9a5
+# Extended time span for testing generalization
+t_long = (0.0, 50.0)
+
+# ╔═╡ eb3d760b-1ac0-4e30-96ac-c4461d993dc8
+# Solve with recovered dynamics
+estimation_prob = ODE.ODEProblem(
+	recovered_dynamics!,
+	u0, tspan,
+	parameter_res.u
+)
+
+# ╔═╡ 8a06c86c-64a7-4dc4-8280-7e6a42b55967
+# Solve with recovered dynamics
+estimation_prob_long = ODE.ODEProblem(
+	recovered_dynamics!,
+	u0,
+	t_long,
+	parameter_res.u
+)
+
 # ╔═╡ 34e3c392-97c6-11f0-292d-3bc1da9e2bd8
-begin
-    # Extended time span for testing generalization
-    t_long = (0.0, 50.0)
+estimate = ODE.solve(estimation_prob, ODE.Tsit5(), saveat = 0.1)
 
-    # Solve with recovered dynamics
-    estimation_prob = ODEProblem(
-        recovered_dynamics!,
-        u0,
-        t_long,
-        parameter_res.u
-    )
-    estimate_long = solve(estimation_prob, Tsit5(), saveat = 0.1)
+# ╔═╡ 2f615fa4-e0d0-4d00-b448-36a97a43bbf5
+estimate_long = ODE.solve(estimation_prob_long, ODE.Tsit5(), saveat = 0.1)
 
-    # True solution for comparison
-    true_prob_long = ODEProblem(lotka!, u0, t_long, p_)
-    true_solution_long = solve(true_prob_long, Tsit5(), saveat = estimate_long.t)
+# ╔═╡ a9518c4d-4d4a-4e68-8c28-dd3106c088ac
+# True solution for comparison
+true_prob_long = ODE.ODEProblem(lotka!, u0, t_long, p_)
 
-    println("Simulated ", length(estimate_long.t), " timesteps")
-    println("Training data was only from t=0 to t=", tspan[2])
-end
+# ╔═╡ 9668bea9-a0c6-4d41-9f31-36e877e1a9d5
+true_solution_long = ODE.solve(true_prob_long, ODE.Tsit5(), saveat = estimate_long.t)
+
+# ╔═╡ f060f452-3920-4102-b65b-3d87c16975c4
+println("Simulated ", length(estimate_long.t), " timesteps")
+
+# ╔═╡ 6cb63e7b-8dbd-46a5-933b-11cabd2426e6
+println("Training data was only from t=0 to t=", tspan[2])
 
 # ╔═╡ 34e3c4a0-97c6-11f0-2783-85f2a102dec9
 md"""
@@ -567,13 +577,19 @@ md"""
 Let's create comprehensive visualizations to assess our model's performance:
 """
 
+# ╔═╡ 1b77692c-037e-4039-8cf2-30dc00b6dfe5
+solution
+
+# ╔═╡ f75893b4-4fa1-4b3c-8289-73a726925926
+estimate
+
 # ╔═╡ 34e3c5c2-97c6-11f0-38df-2f58f8a74aa2
 begin
     # Define colors for consistency
     c1, c2, c3, c4 = :dodgerblue, :orange, :green, :purple
 
     # Plot 1: Timeseries Error (log scale)
-    p1 = plot(
+    p1 = Plots.plot(
         t,
         abs.(Array(solution) .- estimate)' .+ eps(Float32),
         lw = 3,
@@ -591,7 +607,7 @@ begin
     nn_eval = [Lux.apply(trained_model, [x, y], res1.u, st)[1]
                for x in x_range, y in y_range]
 
-    p2 = surface(
+    p2 = Plots.surface(
         x_range, y_range,
         (x, y) -> nn_eval[findfirst(==(x), x_range), findfirst(==(y), y_range)][1],
         title = "NN: Missing Dynamics (dx/dt)",
@@ -602,25 +618,25 @@ begin
     )
 
     # Plot 3: Long-term Extrapolation
-    p3 = plot(estimate_long, lw = 3, color = [c1 c2],
+    p3 = Plots.plot(estimate_long, lw = 3, color = [c1 c2],
               label = ["x (estimated)" "y (estimated)"],
               title = "Long-term Prediction",
               xlabel = "Time",
               ylabel = "Population")
-    plot!(p3, true_solution_long, lw = 3,
+    Plots.plot!(p3, true_solution_long, lw = 3,
           linestyle = :dash, color = [c3 c4],
           label = ["x (true)" "y (true)"])
-    vline!(p3, [tspan[2]], lw = 2, color = :red,
+    Plots.vline!(p3, [tspan[2]], lw = 2, color = :red,
            linestyle = :dash, label = "Training boundary")
 
     # Combine all plots
-    plot(p1, p2, p3, layout = (1, 3), size = (1200, 400))
+    Plots.plot(p1, p2, p3, layout = (1, 3), size = (1200, 400))
 end
 
 # ╔═╡ 34e3c8a6-97c6-11f0-3ecc-618fe114d0f1
 begin
     # Additional visualization: Phase space comparison
-    p_phase = plot(
+    p_phase = Plots.plot(
         estimate_long[1, :], estimate_long[2, :],
         lw = 2,
         color = c1,
@@ -4264,19 +4280,30 @@ version = "1.9.2+0"
 # ╠═08ec594e-66a5-4b79-8b01-e1cccdcf3ce8
 # ╠═ebbc5c06-b74a-4f92-a632-3881b3d105c0
 # ╠═18048779-0f36-4577-9aef-52f19c9d362b
+# ╠═cce79c72-2b9b-4584-abf5-38b630dd8860
 # ╠═ff567001-5678-cdef-0123-678901234567
 # ╟─a9012345-1234-5678-cdef-789012345678
 # ╟─a9b8c7d6-5e4f-3210-9876-543210fedcba
 # ╠═34e3b884-97c6-11f0-1dea-3342c720edc0
 # ╠═34e3bb86-97c6-11f0-198e-1ba0bff9ca9b
 # ╟─34e3bd20-97c6-11f0-2ae5-234797c6b56d
-# ╠═34e3be7e-97c6-11f0-3a65-3f9adb69e984
 # ╠═34e3bfd2-97c6-11f0-13d2-f30d38ac65fb
-# ╠═34e3c0a4-97c6-11f0-159a-fb26f672a6df
+# ╟─34e3c0a4-97c6-11f0-159a-fb26f672a6df
+# ╠═25d68afd-38f9-4f46-b773-b630e81eb332
 # ╠═34e3c160-97c6-11f0-0666-6360e0a98739
-# ╠═34e3c32c-97c6-11f0-072d-e7dbb149abf8
+# ╟─34e3c32c-97c6-11f0-072d-e7dbb149abf8
+# ╠═9b4b7fe9-2c96-4b63-8be8-e5aeadf6b9a5
+# ╠═eb3d760b-1ac0-4e30-96ac-c4461d993dc8
+# ╠═8a06c86c-64a7-4dc4-8280-7e6a42b55967
 # ╠═34e3c392-97c6-11f0-292d-3bc1da9e2bd8
-# ╠═34e3c4a0-97c6-11f0-2783-85f2a102dec9
+# ╠═2f615fa4-e0d0-4d00-b448-36a97a43bbf5
+# ╠═a9518c4d-4d4a-4e68-8c28-dd3106c088ac
+# ╠═9668bea9-a0c6-4d41-9f31-36e877e1a9d5
+# ╠═f060f452-3920-4102-b65b-3d87c16975c4
+# ╠═6cb63e7b-8dbd-46a5-933b-11cabd2426e6
+# ╟─34e3c4a0-97c6-11f0-2783-85f2a102dec9
+# ╠═1b77692c-037e-4039-8cf2-30dc00b6dfe5
+# ╠═f75893b4-4fa1-4b3c-8289-73a726925926
 # ╠═34e3c5c2-97c6-11f0-38df-2f58f8a74aa2
 # ╠═34e3c8a6-97c6-11f0-3ecc-618fe114d0f1
 # ╠═34e3c9be-97c6-11f0-279d-2b8d4251a3fb
