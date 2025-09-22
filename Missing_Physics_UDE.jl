@@ -4,6 +4,32 @@
 using Markdown
 using InteractiveUtils
 
+# ╔═╡ a1b2c3d4-e5f6-7890-abcd-ef1234567890
+md"""
+# Automatically Discover Missing Physics by Embedding Machine Learning into Differential Equations
+
+In this notebook, we'll demonstrate how Universal Differential Equations (UDE) can help discover missing physics in mathematical models using the Lotka-Volterra predator-prey equations.
+
+## The Lotka-Volterra System
+
+The Lotka-Volterra equations describe predator-prey dynamics:
+
+```math
+\begin{align}
+\frac{dx}{dt} &= \alpha x - \beta xy \\
+\frac{dy}{dt} &= \gamma xy - \delta y
+\end{align}
+```
+
+where:
+- `x` represents prey population
+- `y` represents predator population
+- `α` is prey growth rate
+- `β` is predation rate affecting prey
+- `γ` is predator efficiency in converting prey
+- `δ` is predator death rate
+"""
+
 # ╔═╡ 885f5685-5239-42aa-942c-2b9bdf7df221
 # SciML Tools
 import OrdinaryDiffEq as ODE
@@ -57,32 +83,6 @@ import StableRNGs
 
 # ╔═╡ ef456789-abcd-1234-5678-9abcdef01234
 Plots.gr()
-
-# ╔═╡ a1b2c3d4-e5f6-7890-abcd-ef1234567890
-md"""
-# Automatically Discover Missing Physics by Embedding Machine Learning into Differential Equations
-
-In this notebook, we'll demonstrate how Universal Differential Equations (UDE) can help discover missing physics in mathematical models using the Lotka-Volterra predator-prey equations.
-
-## The Lotka-Volterra System
-
-The Lotka-Volterra equations describe predator-prey dynamics:
-
-```math
-\begin{align}
-\frac{dx}{dt} &= \alpha x - \beta xy \\
-\frac{dy}{dt} &= \gamma xy - \delta y
-\end{align}
-```
-
-where:
-- `x` represents prey population
-- `y` represents predator population
-- `α` is prey growth rate
-- `β` is predation rate affecting prey
-- `γ` is predator efficiency in converting prey
-- `δ` is predator death rate
-"""
 
 # ╔═╡ b2c3d4e5-f6a7-8901-bcde-f12345678901
 md"""

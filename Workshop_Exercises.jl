@@ -8,7 +8,7 @@ using InteractiveUtils
 md"""
 # Julia Workshop Exercises
 
-This notebook contains exercises from the UCI Data Science Initiative Julia workshop.
+This notebook contains exercises from the [Julia Modeling Workshop](https://github.com/SciML/Julia_Modeling_Workshop).
 Work through these problems at your own pace. Solutions are provided in the companion `Workshop_Solutions.jl` notebook.
 
 ## Instructions
@@ -30,13 +30,15 @@ md"""
 
 Use Julia's array and control flow syntax in order to define the NxN Strang matrix:
 
-$$ \left[\begin{array}{ccccc}
--2 & 1\\
-1 & -2 & 1\\
- & \ddots & \ddots & \ddots\\
- &  & \ddots & \ddots & 1\\
- &  &  & 1 & -2
-\end{array}\right] $$
+```math
+\begin{bmatrix}
+-2 & 1 & 0 & \cdots & 0\\
+1 & -2 & 1 & \cdots & 0\\
+0 & 1 & -2 & \ddots & \vdots\\
+\vdots & \vdots & \ddots & \ddots & 1\\
+0 & 0 & \cdots & 1 & -2
+\end{bmatrix}
+```
 
 i.e. a matrix with `-2` on the diagonal, 1 on the off-diagonals, and 0 elsewhere.
 """
@@ -111,47 +113,47 @@ md"""
 
 An AR1 timeseries is defined by
 
-$$ x_{t+1} = \alpha x_t + \epsilon_{t+1} $$
+``x_{t+1} = \alpha x_t + \epsilon_{t+1}``
 
-where $x_0 = 0$ and $t=0,\ldots,T$. The shocks ${\epsilon_t}$ are i.i.d. standard normal (`N(0,1)`, given by `randn()`). Using $T=200$ for:
+where ``x_0 = 0`` and ``t=0,\ldots,T``. The shocks ``\{\epsilon_t\}`` are i.i.d. standard normal (``N(0,1)``, given by `randn()`). Using ``T=200`` for:
 
-1. $\alpha = 0$
-2. $\alpha = 0.5$
-3. $\alpha = 0.9$
+1. ``\alpha = 0``
+2. ``\alpha = 0.5``
+3. ``\alpha = 0.9``
 
-use Plots.jl to plot a timecourse for each of the parameters. Label the lines for the values of $\alpha$ that generate them using the `label` argument in `plot`.
+use Plots.jl to plot a timecourse for each of the parameters. Label the lines for the values of ``\alpha`` that generate them using the `label` argument in `plot`.
 """
 
 # ╔═╡ 8f96a7b2-3c4d-11ef-eeee-f80993c4d5e3
 # using Plots
 # Your solution here
 
-# ╔═╡ 907b8c3-4d5e-11ef-ffff-0914d5e6f709
+# ╔═╡ 12cf4bda-9773-11f0-03cb-6d96b1467370
 md"""
 ### Logistic Map Problem
 
 The logistic difference equation is defined by the recursion
 
-$$ b_{n+1}=r \cdot b_{n}(1-b_{n}) $$
+``b_{n+1}=r \cdot b_{n}(1-b_{n})``
 
-where $b_{n}$ is the number of bunnies at time $n$. Starting with $b_{0}=.25$, by around $400$ iterations this will reach a steady state. This steady state (or steady periodic state) is dependent on $r$. Write a function which plots the steady state attractor. This is done as follows:
+where ``b_{n}`` is the number of bunnies at time ``n``. Starting with ``b_{0}=.25``, by around ``400`` iterations this will reach a steady state. This steady state (or steady periodic state) is dependent on ``r``. Write a function which plots the steady state attractor. This is done as follows:
 
-1) Solve for the steady state(s) for each given $r$ (i.e. iterate the relation 400 times).
+1) Solve for the steady state(s) for each given ``r`` (i.e. iterate the relation 400 times).
 
-2) Calculate "every state" in the steady state attractor. This means, at steady state (after the first 400 iterations), save the next 150 values. Call this set of values $y_s(r)$.
+2) Calculate "every state" in the steady state attractor. This means, at steady state (after the first 400 iterations), save the next 150 values. Call this set of values ``y_s(r)``.
 
-3) Do steps (1) and (2) with $r\in\left(2.9,4\right)$, `dr=.001`. Plot $r$ x-axis vs $y_s(r)$ (value seen in the attractor) using Plots.jl. Your result should be the [Logistic equation bifurcation diagram](https://upload.wikimedia.org/wikipedia/commons/7/7d/LogisticMap_BifurcationDiagram.png).
+3) Do steps (1) and (2) with ``r\in\left(2.9,4\right)``, `dr=.001`. Plot ``r`` x-axis vs ``y_s(r)`` (value seen in the attractor) using Plots.jl. Your result should be the [Logistic equation bifurcation diagram](https://upload.wikimedia.org/wikipedia/commons/7/7d/LogisticMap_BifurcationDiagram.png).
 """
 
-# ╔═╡ a18c9d4-5e6f-11ef-0001-1a15e6f70819
+# ╔═╡ 12cf4e46-9773-11f0-09c7-7de4f42ebc95
 # Your solution here
 
-# ╔═╡ b29dae5-6f70-11ef-0002-2b26f7081920
+# ╔═╡ 12cf4e82-9773-11f0-2342-03ab18c26cb8
 md"""
 ## Intermediate Problems
 """
 
-# ╔═╡ c3aebf6-7081-11ef-0003-3c37081a2b31
+# ╔═╡ 12cf4ed2-9773-11f0-1060-9d92e48a9c3f
 md"""
 ### MyRange and LinSpace Problem
 
@@ -172,21 +174,21 @@ Check out call overloading. Overload the call on the UnitStepRange to give an in
 Do your implementations obey dimensional analysis? Try using the package `Unitful` to build arrays of numbers with units (i.e. an array of numbers who have values of Newtons), and see if you can make your LinSpace not give errors.
 """
 
-# ╔═╡ d4bfc07-8192-11ef-0004-4d481923c42
+# ╔═╡ 12cf55c6-9773-11f0-33ed-ebc6495c8121
 # Part 1: MyRange implementation
 struct MyRange
     # Your fields here
 
 end
 
-# ╔═╡ e5c0d18-92a3-11ef-0005-5e592a34d53
+# ╔═╡ 12cf5652-9773-11f0-04ee-eb67ac032432
 # Part 2: LinSpace implementation
 struct MyLinSpace
     # Your fields here
 
 end
 
-# ╔═╡ f6d1e29-a3b4-11ef-0006-6f6a3b45e64
+# ╔═╡ 12cf56b6-9773-11f0-1566-7b676b62f96b
 md"""
 ### Operator Problem
 
@@ -197,10 +199,10 @@ Recall the Strang matrix. Define a type `StrangMatrix` and define a dispatch suc
 **Advanced Bonus**: Iterative solvers solve `Ax=b` and only require the definition of matrix multiplication. Thus utilize IterativeSolvers.jl to solve `Ax=b` for `b=rand(100)` using your lazy matrix type. Hint: you will need to define `mul!` from `LinearAlgebra` (standard library). You will also need to define a different version of your Strang matrix which holds a size and has `Base.eltype` defined.
 """
 
-# ╔═╡ 07e2f3a-b4c5-11ef-0007-7074c556f75
+# ╔═╡ 12cf58dc-9773-11f0-19b1-f31a709c09ea
 # Your StrangMatrix type and multiplication
 
-# ╔═╡ 18f404b-c5d6-11ef-0008-8185d667f86
+# ╔═╡ 12cf5922-9773-11f0-05ca-7f2e504cd8d3
 md"""
 ### Regression Problem
 
@@ -213,7 +215,7 @@ Compare your results to that of using `llsq` from `MultivariateStats.jl` (note: 
 Using your OLS estimator or one of the aforementioned packages, solve for the regression line using the (X,y) data below. Plot the (X,y) scatter plot using `scatter!` from Plots.jl. Add the regression line. Add a title saying "Regression Plot on Fake Data", and label the x and y axis.
 """
 
-# ╔═╡ 2a0515c-d6e7-11ef-0009-9296e778f97
+# ╔═╡ 12cf5b52-9773-11f0-38c0-8b91764d74ca
 # Prepare Data For Regression Problem
 begin
     X_reg = rand(1000, 3)               # feature matrix
@@ -225,10 +227,10 @@ begin
     y_reg2 = 2 * X_reg2 + 0.1 * randn(100)
 end
 
-# ╔═╡ 3b1626d-e7f8-11ef-000a-a3a9f889fa8
+# ╔═╡ 12cf5c2e-9773-11f0-34d2-170de61df546
 # Your regression solution
 
-# ╔═╡ 4c2737e-f809-11ef-000b-b4b90990aa9
+# ╔═╡ 12cf5c76-9773-11f0-28bc-653a99b1d7bc
 md"""
 ### Type Hierarchy Problem
 
@@ -237,31 +239,31 @@ Make a function `person_info(x)` where, if `x` is a any type of person, print th
 Note that in order to do this you will need to re-structure the type hierarchy. Make an AbstractPerson and AbstractStudent type, define the subclassing structure, and write dispatches on these abstract types. Note that you cannot define subclasses of concrete types!
 """
 
-# ╔═╡ 5d3848f-091a-11ef-000c-c5c91aa1bb0
+# ╔═╡ 12cf5dfa-9773-11f0-1818-1303c529c97c
 # Your type hierarchy and dispatch solution
 
-# ╔═╡ 6e4959a-1a2b-11ef-000d-d6da2bb2cc1
+# ╔═╡ 12cf5e36-9773-11f0-0991-c78fe8ddd111
 md"""
 ### Distribution Quantile Problem (From Josh Day)
 
 To find the quantile of a number `q` in a distribution, one can use a Newton method
 
-$$ \theta_{n+1} = \theta_{n} - \frac{cdf(\theta)-q}{pdf(\theta)} $$
+``\theta_{n+1} = \theta_{n} - \frac{cdf(\theta)-q}{pdf(\theta)}``
 
-to have $\theta_{n} \rightarrow$ the value of for the `q`th quantile. Use multiple dispatch to write a generic algorithm for which calculates the `q`th quantile of any `UnivariateDistribution` in Distributions.jl, and test your result against the `quantile(d::UnivariateDistribution,q::Number)` function.
+to have ``\theta_{n} \rightarrow`` the value of for the `q`th quantile. Use multiple dispatch to write a generic algorithm for which calculates the `q`th quantile of any `UnivariateDistribution` in Distributions.jl, and test your result against the `quantile(d::UnivariateDistribution,q::Number)` function.
 
-Hint: Use $\theta_{0} = $ mean of the distribution
+Hint: Use ``\theta_{0} = `` mean of the distribution
 """
 
-# ╔═╡ 7f5a6ab-2b3c-11ef-000e-e7eb3cc3dd2
+# ╔═╡ 12cf5f62-9773-11f0-08f5-374d6cb73f06
 # Your quantile solution
 
-# ╔═╡ 906b7bc-3c4d-11ef-000f-f8fc4dd4ee3
+# ╔═╡ 12cf5f9e-9773-11f0-10f3-f56d7af34886
 md"""
 ## Advanced Problems
 """
 
-# ╔═╡ a17c8cd-4d5e-11ef-0010-0910bee5ff4
+# ╔═╡ 12cf5fe4-9773-11f0-10aa-6da91ca6381a
 md"""
 ### Metaprogramming Problem
 
@@ -277,34 +279,48 @@ Implement your own version of the `@evalpoly` macro called `@myevalpoly`.
 **Note**: While you can create values using macros in the top level scope, this is not good practice and will not work in function scopes. Instead, you should return an expression for the computation of the polynomial.
 """
 
-# ╔═╡ b28d9de-5e6f-11ef-0011-1a11cff6005
+# ╔═╡ 12cf619c-9773-11f0-248b-2973f2e36ebb
 # Your macro implementation
 
-# ╔═╡ c39eaef-6f70-11ef-0012-2b22dff7116
+# ╔═╡ 12cf61d8-9773-11f0-1de2-498092fe6b93
 md"""
 ### Plot the roots of Wilkinson's polynomial with perturbation
 
 [Wilkinson's polynomial](https://en.wikipedia.org/wiki/Wilkinson%27s_polynomial) has the form
-$$
-w(x)=\underbrace{\prod_{i=1}^{20}(x-i)}_\text{root form}=\underbrace{a_1+a_2x+a_3x^2+\cdots+a_{21}x^{20}}_\text{coefficient form}.
-$$
+``w(x)=\underbrace{\prod_{i=1}^{20}(x-i)}_\text{root form}=\underbrace{a_1+a_2x+a_3x^2+\cdots+a_{21}x^{20}}_\text{coefficient form}.``
 
-It is a famous example of ill-conditioning in numerical analysis. One can show this visually by plotting the roots of polynomials with perturbed coefficients $\hat{a}_k=a_k(1+10^{-10}r_k)$, where $r_k$ is a normally distributed random number.
+It is a famous example of ill-conditioning in numerical analysis. One can show this visually by plotting the roots of polynomials with perturbed coefficients ``\hat{a}_k=a_k(1+10^{-10}r_k)``, where ``r_k`` is a normally distributed random number.
 
 This problem has three parts, which are:
 
-1. Convert root form to coefficient form. (Compute $a_k$)
+1. Convert root form to coefficient form. (Compute ``a_k``)
 2. Calculate roots of a polynomial by using the [companion matrix](https://en.wikipedia.org/wiki/Companion_matrix).
 3. Plot the roots of polynomials
 """
 
-# ╔═╡ d4afbfa-7081-11ef-0013-3c33eff8227
+# ╔═╡ 12cf6372-9773-11f0-21ac-adc33737e035
 # Your Wilkinson's polynomial solution
+
+# ╔═╡ 00000000-0000-0000-0000-000000000001
+PLUTO_PROJECT_TOML_CONTENTS = """
+[deps]
+"""
+
+# ╔═╡ 00000000-0000-0000-0000-000000000002
+PLUTO_MANIFEST_TOML_CONTENTS = """
+# This file is machine-generated - editing it directly is not advised
+
+julia_version = "1.11.6"
+manifest_format = "2.0"
+project_hash = "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+
+[deps]
+"""
 
 # ╔═╡ Cell order:
 # ╟─a1b2c3d4-5e6f-11ef-0000-1a2b3c4d5e6f
 # ╟─b2c3d4e5-6f70-11ef-1111-2b3c4d5e6f70
-# ╟─c3d4e5f6-7081-11ef-2222-3c4d5e6f7081
+# ╠═c3d4e5f6-7081-11ef-2222-3c4d5e6f7081
 # ╠═d4e5f607-8192-11ef-3333-4d5e6f708192
 # ╟─e5f60718-92a3-11ef-4444-5e6f7081a2b3
 # ╠═f6071829-a3b4-11ef-5555-6f7081a2b3c4
@@ -317,23 +333,25 @@ This problem has three parts, which are:
 # ╟─6d748590-1a2b-11ef-cccc-d6e7f8891a31
 # ╟─7e8596a1-2b3c-11ef-dddd-e7f8992b3c42
 # ╠═8f96a7b2-3c4d-11ef-eeee-f80993c4d5e3
-# ╟─907b8c3-4d5e-11ef-ffff-0914d5e6f709
-# ╠═a18c9d4-5e6f-11ef-0001-1a15e6f70819
-# ╟─b29dae5-6f70-11ef-0002-2b26f7081920
-# ╟─c3aebf6-7081-11ef-0003-3c37081a2b31
-# ╠═d4bfc07-8192-11ef-0004-4d481923c42
-# ╠═e5c0d18-92a3-11ef-0005-5e592a34d53
-# ╟─f6d1e29-a3b4-11ef-0006-6f6a3b45e64
-# ╠═07e2f3a-b4c5-11ef-0007-7074c556f75
-# ╟─18f404b-c5d6-11ef-0008-8185d667f86
-# ╠═2a0515c-d6e7-11ef-0009-9296e778f97
-# ╠═3b1626d-e7f8-11ef-000a-a3a9f889fa8
-# ╟─4c2737e-f809-11ef-000b-b4b90990aa9
-# ╠═5d3848f-091a-11ef-000c-c5c91aa1bb0
-# ╟─6e4959a-1a2b-11ef-000d-d6da2bb2cc1
-# ╠═7f5a6ab-2b3c-11ef-000e-e7eb3cc3dd2
-# ╟─906b7bc-3c4d-11ef-000f-f8fc4dd4ee3
-# ╟─a17c8cd-4d5e-11ef-0010-0910bee5ff4
-# ╠═b28d9de-5e6f-11ef-0011-1a11cff6005
-# ╟─c39eaef-6f70-11ef-0012-2b22dff7116
-# ╠═d4afbfa-7081-11ef-0013-3c33eff8227
+# ╟─12cf4bda-9773-11f0-03cb-6d96b1467370
+# ╠═12cf4e46-9773-11f0-09c7-7de4f42ebc95
+# ╟─12cf4e82-9773-11f0-2342-03ab18c26cb8
+# ╟─12cf4ed2-9773-11f0-1060-9d92e48a9c3f
+# ╠═12cf55c6-9773-11f0-33ed-ebc6495c8121
+# ╠═12cf5652-9773-11f0-04ee-eb67ac032432
+# ╟─12cf56b6-9773-11f0-1566-7b676b62f96b
+# ╠═12cf58dc-9773-11f0-19b1-f31a709c09ea
+# ╟─12cf5922-9773-11f0-05ca-7f2e504cd8d3
+# ╠═12cf5b52-9773-11f0-38c0-8b91764d74ca
+# ╠═12cf5c2e-9773-11f0-34d2-170de61df546
+# ╟─12cf5c76-9773-11f0-28bc-653a99b1d7bc
+# ╠═12cf5dfa-9773-11f0-1818-1303c529c97c
+# ╟─12cf5e36-9773-11f0-0991-c78fe8ddd111
+# ╠═12cf5f62-9773-11f0-08f5-374d6cb73f06
+# ╟─12cf5f9e-9773-11f0-10f3-f56d7af34886
+# ╟─12cf5fe4-9773-11f0-10aa-6da91ca6381a
+# ╠═12cf619c-9773-11f0-248b-2973f2e36ebb
+# ╟─12cf61d8-9773-11f0-1de2-498092fe6b93
+# ╠═12cf6372-9773-11f0-21ac-adc33737e035
+# ╟─00000000-0000-0000-0000-000000000001
+# ╟─00000000-0000-0000-0000-000000000002

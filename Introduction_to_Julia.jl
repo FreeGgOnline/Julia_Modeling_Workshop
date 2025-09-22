@@ -234,14 +234,14 @@ md"""
 Julia's JIT compiler optimizes functions, not global scope code.
 """
 
-# ╔═╡ 2829c223-90ef-11ef-9012-2b89bcd3e4f5
+# ╔═╡ b0e46118-d9be-47f3-9060-715c630d9a3a
 # BAD: Global scope computation
-global_sum = 0.0
-data_array = rand(1000)
-
-# ╔═╡ 393ad334-a1f0-11ef-0123-3c9ade45f607
-for x in data_array
-    global global_sum += x  # Slow due to type instability
+begin
+	global_sum = 0.0
+	data_array = rand(1000)
+	for x in data_array
+    	global global_sum += x  # Slow due to type instability
+	end
 end
 
 # ╔═╡ 4a4be445-b201-11ef-1234-4da5ef567189
@@ -373,7 +373,7 @@ Julia automatically specializes functions for each combination of argument types
 # ╔═╡ a09f7bbb-1867-11ef-3456-a30bef7ab789
 # Generic function
 function process_data(x::T) where T
-    result = zero(T)  # Type-appropriate zero
+    result = zero(eltype(T))  # Type-appropriate zero
     for val in x
         result += val^2
     end
@@ -388,8 +388,8 @@ float_data = rand(1000)
 @btime process_data($float_data)
 
 # ╔═╡ d3d2aeee-4b9a-11ef-6789-d63e02abde01
-# Specialized for Int32 arrays
-int_data = rand(Int32, 1000)
+# Specialized for Int arrays
+int_data = rand(ComplexF64, 1000)
 
 # ╔═╡ e4e3bfff-5cab-11ef-7890-e74f23bcef12
 @btime process_data($int_data)
@@ -397,31 +397,6 @@ int_data = rand(Int32, 1000)
 # ╔═╡ f5f4d110-6dbc-11ef-8901-f8503cd0f023
 # Each gets its own optimized version
 methods(process_data)
-
-# ╔═╡ 06040721-7ecd-11ef-9012-09624de1f134
-md"""
-### Limiting Specialization
-
-Sometimes you want to prevent over-specialization to reduce compilation time.
-"""
-
-# ╔═╡ 17151832-8fde-11ef-0123-1a78bc232456
-# Use abstract types to limit specialization
-function generic_sum(arr::AbstractArray)
-    s = zero(eltype(arr))
-    for x in arr
-        s += x
-    end
-    return s
-end
-
-# ╔═╡ 28262943-90ef-11ef-1234-2b89de343567
-# Or use @nospecialize for specific arguments
-function process_with_options(@nospecialize(options), data)
-    # options won't trigger specialization
-    # data will be specialized
-    return sum(data) * get(options, :scale, 1.0)
-end
 
 # ╔═╡ 39373a54-a1f0-11ef-2345-3c9af0454689
 md"""
@@ -650,8 +625,7 @@ version = "5.11.0+0"
 # ╠═f5f868f0-6dbc-11ef-6789-f8506789a0fb
 # ╠═0607a001-7ecd-11ef-7890-096189ab1c2d
 # ╟─1718b112-8fde-11ef-8901-1a789abc2d3e
-# ╠═2829c223-90ef-11ef-9012-2b89bcd3e4f5
-# ╠═393ad334-a1f0-11ef-0123-3c9ade45f607
+# ╠═b0e46118-d9be-47f3-9060-715c630d9a3a
 # ╠═4a4be445-b201-11ef-1234-4da5ef567189
 # ╠═5b5cf556-c312-11ef-2345-5eb6f06789ab
 # ╟─6c6e0667-d423-11ef-3456-6fc7189abcd0
@@ -680,9 +654,6 @@ version = "5.11.0+0"
 # ╠═d3d2aeee-4b9a-11ef-6789-d63e02abde01
 # ╠═e4e3bfff-5cab-11ef-7890-e74f23bcef12
 # ╠═f5f4d110-6dbc-11ef-8901-f8503cd0f023
-# ╟─06040721-7ecd-11ef-9012-09624de1f134
-# ╠═17151832-8fde-11ef-0123-1a78bc232456
-# ╠═28262943-90ef-11ef-1234-2b89de343567
 # ╟─39373a54-a1f0-11ef-2345-3c9af0454689
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

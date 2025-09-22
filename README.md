@@ -6,11 +6,11 @@ This workshop provides comprehensive training in high-performance scientific com
 
 The workshop emphasizes practical, hands-on learning through interactive Pluto notebooks, progressing from fundamental Julia concepts through sophisticated modeling techniques. You'll learn to build performant scientific models, solve large-scale stiff systems, perform inverse problem solving, and leverage automatic differentiation for machine learning integration. Whether you're modeling chemical kinetics, biological systems, or physical processes, these materials provide the tools and knowledge needed to deploy advanced computational models on high-performance computing systems.
 
-This workshop bridges the gap between traditional numerical methods and modern machine learning approaches, demonstrating how Julia's unique features enable unprecedented performance and expressiveness in scientific computing.
+This workshop bridges the gap between traditional numerical methods and modern machine learning approaches, demonstrating how Julia's unique features enable performance and expressiveness in scientific computing.
 
 ## About the Author
 
-Dr. Chris Rackauckas is the VP of Modeling and Simulation at JuliaHub, the Director of Scientific Research at Pumas-AI, Co-PI of the Julia Lab at MIT, and the lead developer of the Julia SciML Open Source Software Organization. For his work in mechanistic machine learning, his work is credited for the 15,000x acceleration of NASA Launch Services simulations and recently demonstrated a 60x-570x acceleration over Modelica tools in HVAC simulation, earning Chris the US Air Force Artificial Intelligence Accelerator Scientific Excellence Award. See more at https://chrisrackauckas.com/. He is the lead developer of the Pumas project and received a top presentation award at every ACoP from 2019-2021 for improving methods for uncertainty quantification, automated GPU acceleration of nonlinear mixed effects modeling (NLME), and machine learning assisted construction of NLME models with DeepNLME. For these achievements, Chris received the Emerging Scientist award from ISoP.
+Dr. Chris Rackauckas is the VP of Modeling and Simulation at JuliaHub, the Director of Scientific Research at Pumas-AI, Co-PI of the Julia Lab at MIT, and the lead developer of the Julia SciML Open Source Software Organization. For his work in mechanistic machine learning, his work is credited for the 15,000x acceleration of NASA Launch Services simulations and recently demonstrated a 60x-570x acceleration over Modelica tools in HVAC simulation, earning Chris the US Air Force Artificial Intelligence Accelerator Scientific Excellence Award. See more at https://chrisrackauckas.com/. He was the original architect of the Pumas software for nonlinear mixed effects (NLME) modeling in industrial pharmaceutical applications and received a top presentation award at every ACoP from 2019-2021 for improving methods for uncertainty quantification, automated GPU acceleration of nonlinear mixed effects modeling (NLME), and machine learning assisted construction of NLME models with DeepNLME. This software was known for being used for the Moderna Covid-19 vaccine. For these achievements, Chris received the Emerging Scientist award from ISoP.
 
 ## Quick Start: Running the Workshop Notebooks
 
@@ -29,43 +29,31 @@ import Pluto; Pluto.run()
 
 Then simply paste the URLs below into the URL bar and hit enter. Then click "Edit" to make the notebook live on your computer.
 
-## Notebook URLs
+## Quick Reference Guide
 
-The notebooks for the workshop are available at the following URLs:
+For a comprehensive overview of Julia syntax and scientific modeling concepts:
 
-* [Getting Started with Julia: Installation, Tooling, and Community](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Getting_Started_Julia.jl)
-* [Introduction to Julia for People Who Already Do Scientific Computing](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Introduction_to_Julia.jl)
-* [More Details on Arrays and Matrices (Optional)](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/More_Details_Arrays_Matrices.jl)
-* [Introduction to Mathematical Modeling in Julia: Numerical Solvers for Differential Equations and Nonlinear Systems](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Introduction_Mathematical_Modeling_Julia.jl)
-* [Symbolic-Numeric Model Definitions with Symbolics.jl and ModelingToolkit.jl](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Symbolic_Numeric_ModelingToolkit.jl)
-* [Introduction to Biological Modeling with Catalyst.jl](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Introduction_to_Catalyst.jl)
-* [Solving Inverse Problems and Parameter Estimation with Julia's SciML](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Solving_Inverse_Problems_Julia.jl)
-* [Scientific Machine Learning (SciML) and Equation Discovery with Julia](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Missing_Physics_UDE.jl)
+* [Julia Scientific Modeling Quick Reference](https://sciml.github.io/Julia_Modeling_Workshop/Julia_Scientific_Modeling_Quick_Reference) ([Pluto Notebook Source](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Julia_Scientific_Modeling_Quick_Reference.jl)) - A complete reference guide covering Julia basics, data structures, control flow, plotting, optimization, differential equations, and more
+
+## Workshop Notebooks
+
+The notebooks for the workshop are available as HTML pages with links to the Pluto notebook source code:
+
+* [Getting Started with Julia: Installation, Tooling, and Community](https://sciml.github.io/Julia_Modeling_Workshop/Getting_Started_Julia) ([Pluto Notebook Source](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Getting_Started_Julia.jl))
+* [Introduction to Julia for People Who Already Do Scientific Computing](https://sciml.github.io/Julia_Modeling_Workshop/Introduction_to_Julia) ([Pluto Notebook Source](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Introduction_to_Julia.jl))
+* [More Details on Arrays and Matrices (Optional)](https://sciml.github.io/Julia_Modeling_Workshop/More_Details_Arrays_Matrices) ([Pluto Notebook Source](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/More_Details_Arrays_Matrices.jl))
+* [Introduction to Mathematical Modeling in Julia: Numerical Solvers for Differential Equations and Nonlinear Systems](https://sciml.github.io/Julia_Modeling_Workshop/Introduction_Mathematical_Modeling_Julia) ([Pluto Notebook Source](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Introduction_Mathematical_Modeling_Julia.jl))
+* [Symbolic-Numeric Model Definitions with Symbolics.jl and ModelingToolkit.jl](https://sciml.github.io/Julia_Modeling_Workshop/Symbolic_Numeric_ModelingToolkit) ([Pluto Notebook Source](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Symbolic_Numeric_ModelingToolkit.jl))
+* [Introduction to Biological Modeling with Catalyst.jl](https://sciml.github.io/Julia_Modeling_Workshop/Introduction_to_Catalyst) ([Pluto Notebook Source](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Introduction_to_Catalyst.jl))
+* [Solving Inverse Problems and Parameter Estimation with Julia's SciML](https://sciml.github.io/Julia_Modeling_Workshop/Solving_Inverse_Problems_Julia) ([Pluto Notebook Source](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Solving_Inverse_Problems_Julia.jl))
+* [Scientific Machine Learning (SciML) and Equation Discovery with Julia](https://sciml.github.io/Julia_Modeling_Workshop/Missing_Physics_UDE) ([Pluto Notebook Source](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Missing_Physics_UDE.jl))
 
 ### Exercises
 
 Practice problems and solutions:
 
-* [Workshop Exercises](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Workshop_Exercises.jl) - Problems to practice Julia concepts
-* [Workshop Solutions](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Workshop_Solutions.jl) - Complete solutions with explanations
-
-## Pre-Built Notebook HTMLs
-
-If you would like to view the notebook files without having to run them locally, use these links for the pre-built HTML versions of the notebooks:
-
-* [Getting Started with Julia: Installation, Tooling, and Community](https://sciml.github.io/Julia_Modeling_Workshop/Getting_Started_Julia)
-* [Introduction to Julia for People Who Already Do Scientific Computing](https://sciml.github.io/Julia_Modeling_Workshop/Introduction_to_Julia)
-* [More Details on Arrays and Matrices (Optional)](https://sciml.github.io/Julia_Modeling_Workshop/More_Details_Arrays_Matrices)
-* [Introduction to Mathematical Modeling in Julia](https://sciml.github.io/Julia_Modeling_Workshop/Introduction_Mathematical_Modeling_Julia)
-* [Symbolic-Numeric Model Definitions with Symbolics.jl and ModelingToolkit.jl](https://sciml.github.io/Julia_Modeling_Workshop/Symbolic_Numeric_ModelingToolkit)
-* [Introduction to Biological Modeling with Catalyst.jl](https://sciml.github.io/Julia_Modeling_Workshop/Introduction_to_Catalyst)
-* [Solving Inverse Problems and Parameter Estimation with Julia's SciML](https://sciml.github.io/Julia_Modeling_Workshop/Solving_Inverse_Problems_Julia)
-* [Scientific Machine Learning (SciML) and Equation Discovery with Julia](https://sciml.github.io/Julia_Modeling_Workshop/Missing_Physics_UDE)
-
-### Exercises
-
-* [Workshop Exercises](https://sciml.github.io/Julia_Modeling_Workshop/Workshop_Exercises) - Problems to practice Julia concepts
-* [Workshop Solutions](https://sciml.github.io/Julia_Modeling_Workshop/Workshop_Solutions) - Complete solutions with explanations
+* [Workshop Exercises](https://sciml.github.io/Julia_Modeling_Workshop/Workshop_Exercises) ([Pluto Notebook Source](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Workshop_Exercises.jl)) - Problems to practice Julia concepts
+* [Workshop Solutions](https://sciml.github.io/Julia_Modeling_Workshop/Workshop_Solutions) ([Pluto Notebook Source](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Workshop_Solutions.jl)) - Complete solutions with explanations
 
 # Detailed Getting Started with Julia and the Workshop
 
@@ -259,10 +247,10 @@ Practice problems based on the UCI Data Science Initiative materials:
 
 ## Related SciML Workshops and Tutorials
 
-* [ModelingToolkit Workshop](https://github.com/SciML/ModelingToolkitWorkshop) - Deep dive into symbolic-numeric modeling
-* [Parallel Computing and Scientific Machine Learning](https://book.sciml.ai/) - Comprehensive online book
-* [SciML Tutorials](https://github.com/SciML/SciMLTutorials.jl) - Collection of domain-specific tutorials
-* [Catalyst Tutorials](https://docs.sciml.ai/Catalyst/stable/tutorials/) - Biological modeling tutorials
+* [A Deep Dive Into DifferentialEquations.jl (JuliaCon 2025)](https://github.com/SciML/2025-JuliaCon-DifferentialEquations-Workshop) [(Video)](https://www.youtube.com/watch?v=lSGFAmXKIsE) - Advanced techniques in differential equations
+* [ModelingToolkit Workshop (Hierarchical Component-Based Modeling with ModelingToolkit.jl) (JuliaCon 2024)](https://github.com/SciML/ModelingToolkitWorkshop_JuliaCon2024) [(Video)](https://www.youtube.com/watch?v=OMn9FeVM8NA) - Deep dive into symbolic-numeric modeling
+* [Parallel Computing and Scientific Machine Learning](https://book.sciml.ai/) - Comprehensive online book [(Youtube Playlist)](https://www.youtube.com/@scimlorg)
+* [Catalyst Workshop](https://github.com/SciML/JuliaCon2022_Catalyst_Workshop) [(Video)](https://www.youtube.com/watch?v=tVfxT09AtWQ) - Biological modeling tutorials (Old)
 
 ## Documentation and Learning Resources
 
