@@ -23,6 +23,27 @@
             display: flex;
             min-height: 100vh;
             background: white;
+            position: relative;
+        }
+
+        /* Mobile menu toggle button */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1001;
+            background: #34495e;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .menu-toggle:hover {
+            background: #2c3e50;
         }
 
         /* Sidebar Navigation */
@@ -37,6 +58,7 @@
             height: 100vh;
             overflow-y: auto;
             flex-shrink: 0;
+            transition: transform 0.3s ease;
         }
 
         .sidebar h3 {
@@ -277,31 +299,68 @@
 
         /* Responsive */
         @media (max-width: 1024px) {
-            .container {
-                flex-direction: column;
+            .menu-toggle {
+                display: block;
             }
 
             .sidebar {
-                width: 100%;
-                height: auto;
-                position: static;
-                border-right: none;
-                border-bottom: 1px solid #dee2e6;
+                position: fixed;
+                left: 0;
+                top: 0;
+                z-index: 1000;
+                transform: translateX(-100%);
+                box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
             }
 
             .main-content {
-                padding: 20px;
+                margin-left: 0;
+                max-width: 100%;
+                padding: 60px 20px 20px 20px;
             }
-        }
 
-        @media (max-width: 768px) {
+            /* Make tables scrollable on mobile */
             table {
-                font-size: 11px;
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            th, td {
+                min-width: 150px;
             }
 
             th:first-child,
             td:first-child {
-                width: auto;
+                position: sticky;
+                left: 0;
+                z-index: 10;
+                background: #f9f9f9;
+            }
+
+            th:first-child {
+                background: #2c3e50;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                top: 5px;
+                left: 5px;
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            .sidebar {
+                width: 250px;
+                padding: 20px 15px;
+            }
+
+            .main-content {
+                padding: 50px 15px 15px 15px;
             }
 
             h1 {
@@ -309,7 +368,40 @@
             }
 
             h2 {
-                font-size: 20px;
+                font-size: 18px;
+                margin-top: 25px;
+            }
+
+            h3 {
+                font-size: 16px;
+            }
+
+            table {
+                font-size: 11px;
+            }
+
+            th, td {
+                padding: 4px 6px;
+                min-width: 120px;
+            }
+
+            code {
+                font-size: 10px;
+            }
+
+            .note {
+                font-size: 12px;
+                padding: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            th, td {
+                min-width: 100px;
+            }
+
+            .sidebar {
+                width: 90%;
             }
         }
 
@@ -330,6 +422,9 @@
     </style>
 </head>
 <body>
+    <!-- Mobile menu toggle -->
+    <button class="menu-toggle" onclick="toggleSidebar()">☰ Menu</button>
+
     <div class="container">
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
@@ -352,7 +447,7 @@
             <div class="section-group">
                 <div class="section-title">Scientific Computing</div>
                 <ul>
-                    <li><a href="#ode">ODEs</a></li>
+                    <li><a href="#ode">Differential Equations</a></li>
                     <li><a href="#nonlinear">Nonlinear Solving</a></li>
                     <li><a href="#optimization">Optimization</a></li>
                     <li><a href="#interpolation">Interpolation</a></li>
@@ -360,6 +455,15 @@
                     <li><a href="#fft">FFT & Signal</a></li>
                     <li><a href="#statistics">Statistics</a></li>
                     <li><a href="#pde">PDEs</a></li>
+                </ul>
+            </div>
+
+            <div class="section-group">
+                <div class="section-title">Symbolic-Numeric Tooling</div>
+                <ul>
+                    <li><a href="#symbolic">Symbolic Computing</a></li>
+                    <li><a href="#autodiff">Automatic Differentiation</a></li>
+                    <li><a href="#modelingtoolkit">Component-Based Modeling</a></li>
                 </ul>
             </div>
         </aside>
@@ -530,8 +634,8 @@ A = sparse(B)</code></td>
                 </tbody>
             </table>
 
-            <!-- ODE Section -->
-            <h2 id="ode">Ordinary Differential Equations</h2>
+            <!-- Differential Equations Section -->
+            <h2 id="ode">Differential Equations</h2>
 
             <h3>Single ODE: dy/dt = f(t,y)</h3>
             <table>
@@ -566,7 +670,11 @@ sol = solve(prob)</code></td>
                         <td><code>t_eval = np.linspace(0, 10, 101)
 sol = solve_ivp(f, [0, 10], [1],
                 t_eval=t_eval)</code></td>
-                        <td><code>sol = solve(prob, saveat=0.1)</code></td>
+                        <td><code># Save at regular intervals
+sol = solve(prob, saveat=0.1)
+# Save at specific times (same as 0:0.1:10)
+t_save = 0:0.1:10
+sol = solve(prob, saveat=t_save)</code></td>
                     </tr>
                 </tbody>
             </table>
@@ -610,6 +718,106 @@ sol = solve(prob)</code></td>
                         <td><code>sol = solve_ivp(mysys, [0, 20], [1, 0],
                 method='BDF')</code></td>
                         <td><code>sol = solve(prob, FBDF())</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>DAEs (Mass Matrix Form): M*du/dt = f(u,p,t)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>MATLAB</th>
+                        <th>Python</th>
+                        <th>Julia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Define mass matrix DAE</td>
+                        <td><code>% Mass matrix M (singular)
+M = [1 0 0; 0 1 0; 0 0 0];
+
+function dydt = daefun(t, y)
+    dydt = [y(2);
+            -9.81 - y(3)*y(1);
+            y(1)^2 + y(2)^2 - 1];
+end</code></td>
+                        <td><code># Not possible in SciPy
+# Assimulo/SUNDIALS exist but
+# are less maintained libraries</code></td>
+                        <td><code># Mass matrix DAE
+using DifferentialEquations
+
+function f!(du, u, p, t)
+    du[1] = u[2]
+    du[2] = -9.81 - u[3]*u[1]
+    du[3] = u[1]^2 + u[2]^2 - 1
+end
+
+M = [1.0 0 0
+     0   1 0
+     0   0 0]  # singular mass matrix
+
+f_ode = ODEFunction(f!, mass_matrix=M)
+prob = ODEProblem(f_ode, u0, tspan)</code></td>
+                    </tr>
+                    <tr>
+                        <td>Solve mass matrix DAE</td>
+                        <td><code>options = odeset('Mass', M, ...
+                  'MStateDependence', 'none');
+[t, y] = ode15s(@daefun, [0 10], y0, options)</code></td>
+                        <td><code># Not possible in SciPy</code></td>
+                        <td><code>sol = solve(prob, Rodas5())
+# Automatically detects DAE and uses
+# appropriate algorithm</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Fully Implicit DAEs: f(du/dt, u, p, t) = 0</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>MATLAB</th>
+                        <th>Python</th>
+                        <th>Julia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Define implicit DAE</td>
+                        <td><code>function res = implicitdae(t, y, yp)
+    % Residual form: res = f(t,y,y') = 0
+    res = [yp(1) - y(2);
+           yp(2) + 9.81 + y(3)*y(1);
+           y(1)^2 + y(2)^2 - 1];
+end</code></td>
+                        <td><code># Not possible in SciPy
+# Assimulo/SUNDIALS exist but are
+# less maintained third-party libraries
+# Example would use assimulo.solvers.IDA</code></td>
+                        <td><code>using DifferentialEquations
+
+function residual!(res, du, u, p, t)
+    res[1] = du[1] - u[2]
+    res[2] = du[2] + 9.81 + u[3]*u[1]
+    res[3] = u[1]^2 + u[2]^2 - 1
+end
+
+prob = DAEProblem(residual!, du0, u0, tspan,
+                  differential_vars=[true,true,false])</code></td>
+                    </tr>
+                    <tr>
+                        <td>Solve implicit DAE</td>
+                        <td><code>[y0, yp0] = decic(@implicitdae, 0, ...
+                  guess_y, [], guess_yp, []);
+[t, y] = ode15i(@implicitdae, [0 10], y0, yp0)</code></td>
+                        <td><code># Would require Assimulo installation
+# and IDA solver setup</code></td>
+                        <td><code>sol = solve(prob, IDA())
+# or DFBDF() for stiff DAEs</code></td>
                     </tr>
                 </tbody>
             </table>
@@ -698,6 +906,17 @@ sol = solve(prob)</code></td>
 
             <!-- Optimization -->
             <h2 id="optimization">Optimization</h2>
+
+            <!-- Compatibility Warning -->
+            <div class="note" style="background: #fff3cd; border-color: #ffc107; margin-bottom: 20px;">
+                <p><strong>⚠️ Python Compatibility Warning:</strong> SciPy optimization (used in this section) is incompatible with:</p>
+                <ul style="margin: 5px 0; padding-left: 20px;">
+                    <li>PyTorch autodiff - Cannot use PyTorch gradients with scipy.optimize</li>
+                    <li>PyTorch optimizers (torch.optim) - Different API and tensor requirements</li>
+                    <li>CasADi optimization - Must use CasADi's own solvers</li>
+                </ul>
+                <p style="margin-top: 10px;">For gradient-based optimization with autodiff, PyTorch requires using torch.optim optimizers (Adam, SGD, etc.) with tensor inputs.</p>
+            </div>
 
             <h3>Unconstrained</h3>
             <table>
@@ -1090,6 +1309,555 @@ sol = solve(prob)</code></td>
                 </tbody>
             </table>
 
+            <!-- Symbolic Computing -->
+            <h2 id="symbolic">Symbolic Computing</h2>
+
+            <!-- Compatibility Warning -->
+            <div class="note" style="background: #fff3cd; border-color: #ffc107; margin-bottom: 20px;">
+                <p><strong>⚠️ Python Compatibility Warning:</strong> SymPy (used for Python symbolic computing) is incompatible with:</p>
+                <ul style="margin: 5px 0; padding-left: 20px;">
+                    <li>PyTorch tensors - SymPy uses its own symbolic types, cannot mix with tensors</li>
+                    <li>CasADi - Both are symbolic systems with incompatible representations</li>
+                    <li>SciPy operations - Cannot use SciPy functions on symbolic expressions</li>
+                    <li>NumPy arrays in symbolic expressions - must use SymPy operations</li>
+                </ul>
+            </div>
+
+            <h3>Basic Symbolic Operations</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>MATLAB</th>
+                        <th>Python</th>
+                        <th>Julia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Define symbols</td>
+                        <td><code>syms x y z</code></td>
+                        <td><code>import sympy as sp
+x, y, z = sp.symbols('x y z')</code></td>
+                        <td><code>using Symbolics
+@variables x y z</code></td>
+                    </tr>
+                    <tr>
+                        <td>Create expression</td>
+                        <td><code>expr = x^2 + 2*x*y + y^2</code></td>
+                        <td><code>expr = x**2 + 2*x*y + y**2</code></td>
+                        <td><code>expr = x^2 + 2*x*y + y^2</code></td>
+                    </tr>
+                    <tr>
+                        <td>Substitute values</td>
+                        <td><code>subs(expr, x, 2)</code></td>
+                        <td><code>expr.subs(x, 2)</code></td>
+                        <td><code>substitute(expr, x => 2)</code></td>
+                    </tr>
+                    <tr>
+                        <td>Simplify</td>
+                        <td><code>simplify(expr)</code></td>
+                        <td><code>sp.simplify(expr)</code></td>
+                        <td><code>simplify(expr)</code></td>
+                    </tr>
+                    <tr>
+                        <td>Expand</td>
+                        <td><code>expand(expr)</code></td>
+                        <td><code>sp.expand(expr)</code></td>
+                        <td><code>expand(expr)</code></td>
+                    </tr>
+                    <tr>
+                        <td>Factor</td>
+                        <td><code>factor(expr)</code></td>
+                        <td><code>sp.factor(expr)</code></td>
+                        <td><code>using SymbolicUtils
+SymbolicUtils.simplify(expr)</code></td>
+                    </tr>
+                    <tr>
+                        <td>Generate function (out-of-place)</td>
+                        <td><code>matlabFunction(expr, 'Vars', [x, y])</code></td>
+                        <td><code>f = sp.lambdify([x, y], expr)</code></td>
+                        <td><code>f = build_function(expr, [x, y])
+f_expr = eval(f[1])</code></td>
+                    </tr>
+                    <tr>
+                        <td>Generate function (in-place)</td>
+                        <td><code>% Not available natively</code></td>
+                        <td><code># Not available in SymPy</code></td>
+                        <td><code>f = build_function(expr, [x, y])
+f! = eval(f[2])  # mutating version</code></td>
+                    </tr>
+                    <tr>
+                        <td>Symbolic in numerical solver</td>
+                        <td><code>% Not compatible with ODE solvers</code></td>
+                        <td><code># Not compatible with scipy.integrate</code></td>
+                        <td><code># Can use symbolic parameters in ODE solvers
+using DifferentialEquations, Symbolics
+@variables t x(t) a b
+D = Differential(t)
+eqs = [D(x) ~ a*x + b]
+@named sys = System(eqs)
+sys = complete(sys)
+
+# Solve with symbolic parameters
+u0 = [x => 1.0]
+tspan = (0.0, 1.0)
+p = [a => -2.0, b => 1.0]
+prob = ODEProblem(sys, u0, tspan, p)
+sol = solve(prob, Euler(), dt=0.25, adaptive=false)</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Calculus</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>MATLAB</th>
+                        <th>Python</th>
+                        <th>Julia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Derivative</td>
+                        <td><code>diff(expr, x)</code></td>
+                        <td><code>sp.diff(expr, x)</code></td>
+                        <td><code>D = Differential(x)
+expand_derivatives(D(expr))</code></td>
+                    </tr>
+                    <tr>
+                        <td>Partial derivative</td>
+                        <td><code>diff(expr, x, 2)</code></td>
+                        <td><code>sp.diff(expr, x, 2)</code></td>
+                        <td><code>D = Differential(x)
+expand_derivatives(D^2(expr))</code></td>
+                    </tr>
+                    <tr>
+                        <td>Gradient</td>
+                        <td><code>gradient(f, [x, y, z])</code></td>
+                        <td><code>[sp.diff(f, var) for var in [x, y, z]]</code></td>
+                        <td><code>Symbolics.gradient(f, [x, y, z])</code></td>
+                    </tr>
+                    <tr>
+                        <td>Jacobian</td>
+                        <td><code>jacobian([f1; f2], [x, y])</code></td>
+                        <td><code>sp.Matrix([f1, f2]).jacobian([x, y])</code></td>
+                        <td><code>Symbolics.jacobian([f1, f2], [x, y])</code></td>
+                    </tr>
+                    <tr>
+                        <td>Integral (indefinite)</td>
+                        <td><code>int(expr, x)</code></td>
+                        <td><code>sp.integrate(expr, x)</code></td>
+                        <td><code>using SymbolicIntegration
+symbolic_integrate(expr, x)</code></td>
+                    </tr>
+                    <tr>
+                        <td>Integral (definite)</td>
+                        <td><code>int(expr, x, a, b)</code></td>
+                        <td><code>sp.integrate(expr, (x, a, b))</code></td>
+                        <td><code>using Integrals, Symbolics
+f = build_function(expr, x)
+prob = IntegralProblem((u,p) -> f[1](u), (a, b))
+solve(prob, QuadGKJL())</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Equation Solving</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>MATLAB</th>
+                        <th>Python</th>
+                        <th>Julia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Solve equation</td>
+                        <td><code>solve(x^2 - 4 == 0, x)</code></td>
+                        <td><code>sp.solve(x**2 - 4, x)</code></td>
+                        <td><code>using Symbolics
+symbolic_solve(x^2 - 4, x)</code></td>
+                    </tr>
+                    <tr>
+                        <td>Solve system</td>
+                        <td><code>solve([x + y == 5, x - y == 1], [x, y])</code></td>
+                        <td><code>sp.solve([x + y - 5, x - y - 1], [x, y])</code></td>
+                        <td><code>using Symbolics
+symbolic_solve([x + y ~ 5, x - y ~ 1], [x, y])</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Automatic Differentiation -->
+            <h2 id="autodiff">Automatic Differentiation</h2>
+
+            <!-- Compatibility Warning -->
+            <div class="note" style="background: #fff3cd; border-color: #ffc107; margin-bottom: 20px;">
+                <p><strong>⚠️ Python Compatibility Warning:</strong> PyTorch (used for AD) is incompatible with:</p>
+                <ul style="margin: 5px 0; padding-left: 20px;">
+                    <li>SciPy functions (scipy.integrate, scipy.optimize, etc.) - must use PyTorch equivalents or pure Python</li>
+                    <li>NumPy operations - must convert arrays to tensors and use torch functions</li>
+                    <li>CasADi (used in Component-Based Modeling section) - cannot mix symbolic and AD frameworks</li>
+                </ul>
+            </div>
+
+            <h3>Forward Mode AD</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>MATLAB</th>
+                        <th>Python</th>
+                        <th>Julia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Setup</td>
+                        <td><code>% Not available natively</code></td>
+                        <td><code>import torch</code></td>
+                        <td><code>using ForwardDiff</code></td>
+                    </tr>
+                    <tr>
+                        <td>Gradient (scalar → scalar)</td>
+                        <td><code>% Not available natively
+% Use symbolic or finite differences</code></td>
+                        <td><code>from torch.autograd.functional import jvp
+
+def f(x):
+    return x**2 + torch.sin(x)
+
+x = torch.tensor(2.0)
+v = torch.tensor(1.0)  # tangent vector
+y, df = jvp(f, x, v)  # df is derivative at x=2.0</code></td>
+                        <td><code>f(x) = x^2 + sin(x)
+df = ForwardDiff.derivative(f, 2.0)</code></td>
+                    </tr>
+                    <tr>
+                        <td>Gradient (vector → scalar)</td>
+                        <td><code>% Not available natively</code></td>
+                        <td><code>from torch.autograd.functional import jvp
+
+def f(x):
+    return torch.sum(x**2)
+
+x = torch.tensor([1.0, 2.0])
+# Compute gradient via multiple forward passes
+grad = []
+for i in range(2):
+    v = torch.zeros(2)
+    v[i] = 1.0
+    _, g = jvp(f, x, v)
+    grad.append(g)
+grad = torch.stack(grad)</code></td>
+                        <td><code>f(x) = sum(x.^2)
+grad = ForwardDiff.gradient(f, [1.0, 2.0])</code></td>
+                    </tr>
+                    <tr>
+                        <td>Jacobian</td>
+                        <td><code>% Not available natively</code></td>
+                        <td><code>from torch.autograd.functional import jacobian
+
+def f(x):
+    return torch.stack([x[0]**2, x[0]*x[1]])
+
+x = torch.tensor([1.0, 2.0])
+jac = jacobian(f, x)</code></td>
+                        <td><code>f(x) = [x[1]^2, x[1]*x[2]]
+jac = ForwardDiff.jacobian(f, [1.0, 2.0])</code></td>
+                    </tr>
+                    <tr>
+                        <td>Hessian</td>
+                        <td><code>% Not available natively</code></td>
+                        <td><code>from torch.autograd.functional import hessian
+
+def f(x):
+    return torch.sum(x**2)  # scalar function for Hessian
+
+x = torch.tensor([1.0, 2.0])
+hess = hessian(f, x)</code></td>
+                        <td><code>hess = ForwardDiff.hessian(f, [1.0, 2.0])</code></td>
+                    </tr>
+                    <tr>
+                        <td>Dual numbers</td>
+                        <td><code>% Not available natively</code></td>
+                        <td><code># Not exposed</code></td>
+                        <td><code>using ForwardDiff
+x = ForwardDiff.Dual(2.0, 1.0)
+y = x^2 + sin(x)
+# value: y.value
+# derivative: y.partials[1]</code></td>
+                    </tr>
+                    <tr>
+                        <td>Consistency requirements</td>
+                        <td><code>% N/A</code></td>
+                        <td><code># Must replace ALL NumPy/SciPy calls:
+# np.sin → torch.sin
+# scipy.integrate → not compatible
+# scipy.optimize → not compatible
+# Cannot use with CasADi</code></td>
+                        <td><code># ForwardDiff: requires generic functions
+# (no explicit Float64 types)
+# Must use generic operations
+# e.g. zero(x) instead of 0.0</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Reverse Mode AD (Backpropagation)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>MATLAB</th>
+                        <th>Python</th>
+                        <th>Julia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Setup</td>
+                        <td><code>% Not available natively</code></td>
+                        <td><code>import torch</code></td>
+                        <td><code>using Enzyme</code></td>
+                    </tr>
+                    <tr>
+                        <td>Gradient</td>
+                        <td><code>% Not available natively</code></td>
+                        <td><code>def f(x):
+    return x**2 + torch.sin(x)
+
+x = torch.tensor(2.0, requires_grad=True)
+y = f(x)
+y.backward()
+grad = x.grad  # gradient at x=2.0</code></td>
+                        <td><code>f(x) = x^2 + sin(x)
+x = 2.0
+dx = 0.0
+autodiff(Reverse, f, Active, Duplicated(x, Ref(dx)))
+# gradient is in dx</code></td>
+                    </tr>
+                    <tr>
+                        <td>Vector gradient</td>
+                        <td><code>% Not available natively</code></td>
+                        <td><code>def f(x):
+    return torch.sum(x**2)
+
+x = torch.tensor([1.0, 2.0], requires_grad=True)
+y = f(x)
+y.backward()
+grad = x.grad  # gradient at [1.0, 2.0]</code></td>
+                        <td><code>f(x) = sum(x.^2)
+x = [1.0, 2.0]
+dx = zero(x)
+autodiff(Reverse, f, Active, Duplicated(x, dx))
+# gradient is in dx</code></td>
+                    </tr>
+                    <tr>
+                        <td>Jacobian-vector product (JVP)</td>
+                        <td><code>% Not available natively</code></td>
+                        <td><code>from torch.autograd.functional import jvp
+
+def f(x):
+    return torch.stack([x[0]**2, x[0]*x[1], x[1]**2])
+
+x = torch.tensor([2.0, 3.0])
+v = torch.tensor([1.0, 0.0])  # tangent vector
+y, jvp_result = jvp(f, x, v)</code></td>
+                        <td><code>f(x) = [x[1]^2, x[1]*x[2], x[2]^2]
+x = [2.0, 3.0]
+v = [1.0, 0.0]  # tangent vector
+y, jvp = autodiff(Forward, f, Duplicated, Duplicated(x, v))
+# jvp contains J*v</code></td>
+                    </tr>
+                    <tr>
+                        <td>Vector-Jacobian product (VJP)</td>
+                        <td><code>% Not available natively</code></td>
+                        <td><code>def f(x):
+    return torch.stack([x[0]**2, x[0]*x[1], x[1]**2])
+
+x = torch.tensor([2.0, 3.0], requires_grad=True)
+y = f(x)
+v = torch.tensor([1.0, 0.0, 1.0])  # cotangent vector
+y.backward(v)
+vjp = x.grad  # v^T * J</code></td>
+                        <td><code>f!(y, x) = (y[1] = x[1]^2; y[2] = x[1]*x[2]; y[3] = x[2]^2)
+x = [2.0, 3.0]
+y = zeros(3)
+dx = zeros(2)
+dy = [1.0, 0.0, 1.0]  # cotangent vector
+autodiff(Reverse, f!, Const, Duplicated(y, dy), Duplicated(x, dx))
+# dx contains v^T * J</code></td>
+                    </tr>
+                    <tr>
+                        <td>Consistency requirements</td>
+                        <td><code>% N/A</code></td>
+                        <td><code># Must replace ALL NumPy/SciPy calls:
+# np.exp → torch.exp
+# scipy functions → not compatible
+# No mixed tensor/array operations
+# Incompatible with CasADi</code></td>
+                        <td><code># Enzyme: works with most Julia code
+# Including mutating functions, BLAS
+# Type-stable code recommended
+# for best performance</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Component-Based Modeling -->
+            <h2 id="modelingtoolkit">Component-Based Modeling</h2>
+
+            <!-- Compatibility Warning -->
+            <div class="note" style="background: #fff3cd; border-color: #ffc107; margin-bottom: 20px;">
+                <p><strong>⚠️ Python Compatibility Warning:</strong> This section uses CasADi for Python examples, which is incompatible with:</p>
+                <ul style="margin: 5px 0; padding-left: 20px;">
+                    <li>PyTorch tensors - CasADi uses its own symbolic types</li>
+                    <li>SciPy solvers on CasADi functions - must use CasADi's own solvers</li>
+                    <li>NumPy operations on symbolic expressions - use CasADi operations</li>
+                </ul>
+                <p style="margin-top: 10px;">Julia's ModelingToolkit.jl uses the same solvers from earlier sections (DifferentialEquations.jl, NonlinearSolve.jl, Optimization.jl).</p>
+            </div>
+
+            <h3>System Definition</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>MATLAB</th>
+                        <th>Python</th>
+                        <th>Julia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Define ODE system (Cartesian pendulum)</td>
+                        <td><code>% Use Simulink or write function</code></td>
+                        <td><code># Use CasADi for DAE support
+import casadi as ca
+
+x, y, vx, vy, lam = ca.SX.sym('x'), ca.SX.sym('y'), \
+    ca.SX.sym('vx'), ca.SX.sym('vy'), ca.SX.sym('lam')
+
+dae = {'x': ca.vertcat(x, y, vx, vy, lam),
+       'ode': ca.vertcat(vx, vy, -lam*x, -lam*y - 9.81),
+       'alg': x**2 + y**2 - 1}</code></td>
+                        <td><code>using ModelingToolkit
+
+@parameters t g L
+@variables x(t) y(t) vx(t) vy(t) λ(t)
+D = Differential(t)
+
+eqs = [D(x) ~ vx,
+       D(y) ~ vy,
+       D(vx) ~ -λ * x/L,
+       D(vy) ~ -λ * y/L - g,
+       x^2 + y^2 ~ L^2]
+
+@named pendulum = System(eqs)</code></td>
+                    </tr>
+                    <tr>
+                        <td>Simplify system</td>
+                        <td><code>% Manual simplification</code></td>
+                        <td><code># CasADi cannot do acausal simplification</code></td>
+                        <td><code>pendulum = complete(pendulum)
+pendulum_simplified = mtkcompile(pendulum)</code></td>
+                    </tr>
+                    <tr>
+                        <td>Transient simulation</td>
+                        <td><code>% Create function handle and solve</code></td>
+                        <td><code>F = ca.Function('F', [x, p], [dx])
+# Then integrate with solver</code></td>
+                        <td><code>u0 = [x => 1.0, y => 0.0, vx => 0.0, vy => 0.0]
+tspan = (0.0, 10.0)
+p = [g => 9.81, L => 1.0]
+
+prob = ODEProblem(pendulum_simplified, u0, tspan, p)
+sol = solve(prob)</code></td>
+                    </tr>
+                    <tr>
+                        <td>Steady state solutions</td>
+                        <td><code>% Use fsolve or symbolic solve</code></td>
+                        <td><code># CasADi has its own rootfinder
+import casadi as ca
+# Create rootfinder for algebraic equations
+rf = ca.rootfinder('rf', 'newton', dae)
+sol = rf(x0, p)</code></td>
+                        <td><code>ss_prob = NonlinearProblem(pendulum_simplified, u0, p)
+ss_sol = solve(ss_prob)</code></td>
+                    </tr>
+                    <tr>
+                        <td>Generate LaTeX</td>
+                        <td><code>% Not available for Simulink models</code></td>
+                        <td><code># Not available in CasADi</code></td>
+                        <td><code>using Latexify
+latexify(pendulum)</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+
+            <h3>Component-Based Modeling</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>MATLAB</th>
+                        <th>Python</th>
+                        <th>Julia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Create component</td>
+                        <td><code>% Use Simulink blocks</code></td>
+                        <td><code># No direct equivalent
+# Consider PyMola or OpenModelica</code></td>
+                        <td><code>function Mass(; name, m = 1.0, x = 0.0, v = 0.0)
+    @parameters t
+    @variables x(t) v(t) F(t)
+    @parameters m
+    D = Differential(t)
+
+    eqs = [D(x) ~ v,
+           D(v) ~ F/m]
+
+    System(eqs, t, [x, v, F], [m]; name)
+end
+
+@named mass1 = Mass(m = 2.0)</code></td>
+                    </tr>
+                    <tr>
+                        <td>Connect systems</td>
+                        <td><code>% Simulink connections</code></td>
+                        <td><code># Manual composition</code></td>
+                        <td><code>@named spring = Spring(k = 100)
+@named damper = Damper(c = 10)
+
+connections = [
+    spring.x ~ mass1.x,
+    damper.x ~ mass1.x,
+    mass1.F ~ spring.F + damper.F
+]
+
+@named model = System(connections, t,
+                        systems = [mass1, spring, damper])
+model = complete(model)</code></td>
+                    </tr>
+                    <tr>
+                        <td>Simplify</td>
+                        <td><code>% Simulink cannot simplify</code></td>
+                        <td><code># Manual</code></td>
+                        <td><code>prob = mtkcompile(model, ODEProblem, u0, tspan, p)</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
             <!-- Footer -->
             <footer class="footer">
                 <p>Extended from <a href="https://cheatsheets.quantecon.org/" target="_blank">QuantEcon Cheatsheets</a> for Scientific Computing</p>
@@ -1097,5 +1865,33 @@ sol = solve(prob)</code></td>
             </footer>
         </main>
     </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('active');
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.querySelector('.sidebar');
+            const menuToggle = document.querySelector('.menu-toggle');
+
+            if (window.innerWidth <= 1024) {
+                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+
+        // Close sidebar when clicking on a link on mobile
+        document.querySelectorAll('.sidebar a').forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 1024) {
+                    document.querySelector('.sidebar').classList.remove('active');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
