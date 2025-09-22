@@ -15,18 +15,29 @@ and then run the following command to get Pluto running:
 import Pluto; Pluto.run()
 ```
 
+Then simply paste the URLs below into the URL bar and hit enter. Then click "Edit" to make the notebook live on your computer.
+
 ## Notebook URLs
 
 The notebooks for the workshop are available at the following URLs:
 
 * [Introduction to Julia for People Who Already Do Scientific Computing]()
 * [Introduction to Mathematical Modeling in Julia]()
-* [Inverse Problems and Parameter Estimation with SciML]()
+* [Solving Inverse Problems and Parameter Estimation with Julia's SciML]()
 * [Scientific Machine Learning (SciML) and Equation Discovery with Julia]()
 
-## Detailed Getting Started with Julia and the Workshop
+## Pre-Built Notebook HTMLs
 
-### Installing Julia
+If you would like to view the notebook files without having to run them locally, use these links for the pre-built HTML versions of the notebooks:
+
+* [Introduction to Julia for People Who Already Do Scientific Computing]()
+* [Introduction to Mathematical Modeling in Julia]()
+* [Solving Inverse Problems and Parameter Estimation with Julia's SciML]()
+* [Scientific Machine Learning (SciML) and Equation Discovery with Julia]()
+
+# Detailed Getting Started with Julia and the Workshop
+
+## Installing Julia
 
 If you have never used Julia before, then the first thing is to get started with Julia! There are two recommended ways to do this. The simplest is to go to the Julia webpage [https://julialang.org/downloads/](https://julialang.org/downloads/) and download the binary. There will be a latest current release binary for every operating system: pop that in and you are good to go. 
 
@@ -44,7 +55,7 @@ Once juliaup is installed, you can manage your Julia installation from the termi
 
 We recommend that you stick to the current default `release`, though production scenarios may want to use LTS. Either way, once this is setup you can just use the command `julia` in your terminal and it should pop right up.
 
-### Using the Package Manager
+## Using the Package Manager
 
 To use the package manager in Julia, simply hit `]`. You will see your terminal marker change to a blue `pkg>`. The main commands to know in the package manager mode are:
 
@@ -57,7 +68,7 @@ To use the package manager in Julia, simply hit `]`. You will see your terminal 
 
 You can also use the Julia Pkg.jl package, for example `using Pkg; Pkg.add("MyPackage")`.
 
-### Using Pluto Notebooks
+## Using Pluto Notebooks
 
 Pluto notebooks, such as the one these lecture notes are written in, are a notebook system designed specifically for Julia. Unlike Jupyter notebooks (which, reminder stands for Julia Python R notebooks!), Pluto notebooks are made with an emphasis on reproducible science. As such, it fixes a lot of the issues that arise with the irreproducibility commonly complained about with Jupyter notebooks, such as:
 
@@ -95,11 +106,13 @@ Note: when you first make this notebook live, it will download all of the requir
 * Biological Modeling with Catalyst.jl
 * Symbolically Analyzing Models with ModelingToolkit.jl
 
-## Inverse Problems and Parameter Estimation with SciML
+## Solving Inverse Problems and Parameter Estimation with Julia's SciML
 
 * Nonlinear Optimization with Julia
 * Local Sensitivity Analysis and Automatic Differentiation of Solvers (Adjoint Methods) 
 * Parameter Estimation and Inverse Problems on Differential Equations
+    * Optimization-Based Parameter Estimation
+    * Bayesian Parameter Estimation with MCMC and Uncertainty Quantification
 * Investigating Local and Structural Identifiability
 
 ## Scientific Machine Learning and Equation Discovery with Julia

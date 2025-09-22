@@ -4,20 +4,8 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 885f5685-5239-42aa-942c-2b9bdf7df220
-# For most simplicity, you can `using OrdinaryDiffEq`
-# Or `using DifferentialEquations`
-# This is done to cut the install size.
-using OrdinaryDiffEqTsit5
-
 # ╔═╡ f5c9ea83-6dba-4848-8340-1a8c772bd941
 using Plots
-
-# ╔═╡ e13c7d4f-4cdb-43d5-9f77-33401cb501e2
-# Can simply do `using NonlinearSolve`
-# We are pulling in the subset of just the first order methods (Newton methods)
-# To decrease the installation and load times.
-using NonlinearSolveFirstOrder
 
 # ╔═╡ c7193526-d32f-4f2a-95aa-09e98b88b30b
 using Optimization
@@ -45,46 +33,16 @@ using StatsPlots
 
 # ╔═╡ 45dc0462-d63c-11ef-0f62-e5d029618cc1
 md"""
-# Solving Inverse Problems in Julia: Introduction to Julia's SciML from Scratch
+# Inverse Problems and Parameter Estimation with Julia's SciML
 
-In these notes we will showcase how to solve inverse problems in Julia for
-dynamic and steady state models. We will start all the way from scratch,
-showing you how to first use the forward modeling tools NonlinearSolve.jl
-and DifferentialEquations.jl for solving nonlinear systems, and then show how
-to incorporate automatic differentiation, Optimization.jl and 
-SciMLSensitivity.jl for optimizing complicated cost functions.
-"""
-
-# ╔═╡ 6d29e44b-3d70-4700-ad53-9e75df7ced0c
-md"""
-## Getting Started with Forward Modeling: NonlinearSolve.jl and DifferentialEquations.jl
-
-Before showing how to build inverse models, we need to show how to build forward models. Building forward models in scientific applications usually comes down to one of two forms: a nonlinear system or a system of ordinary differential equations. While there are many other types, this covers a large swath of cases, and also covers extra cases since for example the semi-discretization of a partial differential equation also hits these cases, and thus we will stick to this set.
-
-### Understanding the Relevant Parts of Julia's Package Ecosystem
-
-The open source organization which builds the common numerical tools used throughout Julia is known as SciML. See its website at SciML.ai and its complete documentation at docs.sciml.ai. If you are new to Julia, you might immediately recognize that SciML has a larger scope than packages that you're used to since it's a collection of 200 packages, but a rough way to understand SciML is:
-
-1. It's like Python's SciPy, covering the core numerical utilities like solving equations and building interpolations.
-2. It's like PyTorch/Jax, in that it gives code that is compatible with automatic differentiation and can connect to machine learning libraries (we will use this in the inverse problem section), and its tooling is able to be used with GPUs.
-3. It's like C++/Fortran core codes (SUNDIALS, MINPACK, etc.), where the methods are actually implemented in the libraries and there are many unique methods in the Julia SciML libraries that are not implemented anywhere else.
-4. It's like PETSc/Trillinos in that there are utilities and interfaces covering each major domain, with some tooling written specifically for the system and other parts wrapping commonly used C++/Fortran methods to make them easily available. Additionally, the tooling is HPC-compatible with compatability with MPI and other distributed tooling.
-
-Thus one simple way to explain it is, if SciPy was instead fully written in Python while also being efficient, and that code was fully compatible with automatic differentiation and machine learning libraries, meaning there are no "machine learning library specific packages" for similar functionality and everything is centralized to this one set.
+In these notes we will showcase how to solve inverse problems in Julia. We will use the forward modeling tools like DifferentialEquations.jl for solving nonlinear systems, and then show how to incorporate automatic differentiation, Optimization.jl and SciMLSensitivity.jl for optimizing complicated cost functions.
 """
 
 # ╔═╡ 51c67a4d-f49a-4bb5-a1c2-361ea0e8f20e
 md"""
-### Using DifferentialEquations.jl
+### Setting Up Our Forward Model
 
-DifferentialEquations.jl is a huge set of solvers (documentation: [https://docs.sciml.ai/DiffEqDocs/stable/](https://docs.sciml.ai/DiffEqDocs/stable/)), ~300 methods last time it was counted, with a wide range of tooling from 16th order symplectic integrators to SSP Runge-Kutta methods specifically designed for hyperbolic conservation laws. As such, it most likely has everything that you need, but you most likely don't need all of it. 
-
-As such, for the purpose of keeping this notebook light we will simply pull in the subset of solvers which we plan to use. The documentation of the solver choices can be found at [https://docs.sciml.ai/DiffEqDocs/stable/solvers/ode_solve/](https://docs.sciml.ai/DiffEqDocs/stable/solvers/ode_solve/) and detailed documentation of the OrdinaryDiffEq subpackage structure can be found at [https://docs.sciml.ai/OrdinaryDiffEq/stable/](https://docs.sciml.ai/OrdinaryDiffEq/stable/). For your work, you will likely simply want to `using OrdinaryDiffEq`, which covers most of the "main methods". In this notebook we will specifically `using OrdinaryDiffEqTsit5` to only use/install the standard 5th order explicit Runge-Kutta method for this set of notes.
-"""
-
-# ╔═╡ ca453691-227c-44f1-8b48-8fb42c42d481
-md"""
-Now let's build our first differential equation. If you have not read the introduction tutorial in the DifferentialEquations.jl documentation, it is highly recommended. You can find the introduction tutorial at [https://docs.sciml.ai/DiffEqDocs/stable/getting_started/](https://docs.sciml.ai/DiffEqDocs/stable/getting_started/). Instead of using one of the examples from there, we will use the Lotka-Volterra ODE as our example as it's a nice example for demonstrating inverse problems as well.
+Similar to the previous notes on forward modeling, we will use DiffernetialEquations.jl in order to define and solve the differential equation. For simplicity we will simply put the code here for the Lotka-Volterra model, see the other notebook for details on building models and using the ODE solver.
 
 The Lotka-Volterra system is defined as:
 
@@ -98,18 +56,23 @@ The Lotka-Volterra system is defined as:
 with initial conditions ``x(0) = 1`` and ``y(0) = 1``, with parameters ``\alpha = 1``, ``\beta = 1.5``, ``\gamma = 3``, and ``\delta = 1``. We define the ODE system by first defining a function `f` that computes the derivative:
 """
 
-# ╔═╡ 34efa390-0d6d-48dd-b08b-0c1bc391ffc2
-md"""
-We now define an ODEProblem according to the documentation. In Julia you can get the documentation for how to do things by using the help command `?`:
-"""
+# ╔═╡ 885f5685-5239-42aa-942c-2b9bdf7df220
+# For most simplicity, you can `using OrdinaryDiffEq`
+# Or `using DifferentialEquations`
+# This is done to cut the install size.
+using OrdinaryDiffEqTsit5
 
-# ╔═╡ 448dd6ac-0d7f-4c1f-a9ce-3f9a586951c1
 function lotka_volterra!(du, u, p, t)
     x, y = u
     α, β, δ, γ = p
     du[1] = dx = α * x - β * x * y
     du[2] = dy = -δ * y + γ * x * y
 end
+
+# ╔═╡ 34efa390-0d6d-48dd-b08b-0c1bc391ffc2
+md"""
+We now define an ODEProblem according to the documentation. In Julia you can get the documentation for how to do things by using the help command `?`:
+"""
 
 # ╔═╡ 760b16ea-410f-4f46-ae44-f859de9b75e3
 lotka_u0 = [1.0,1.0]
@@ -143,64 +106,6 @@ We can see that we get a periodic system from both the timeseries solution and t
 
 There is much more that can be said about solving differential equations, but let's leave it here for now and move onto the next part!
 """
-
-# ╔═╡ cba31d00-0a4a-4dab-aada-507ec1244bb1
-md"""
-
-### Solving Nonlinear Systems with NonlinearSolve.jl
-
-"""
-
-# ╔═╡ e921a8b2-4fe8-41cb-8463-6297a7e1646d
-md"""
-NonlinearSolve.jl is similar to what you'd find with for example MATLAB's `fzero` or SciPy's `root` function. It has many improvements in terms of performance and robustness, see a full write up on arxiv at [https://arxiv.org/abs/2403.16341](https://arxiv.org/abs/2403.16341). Since many partial differential equaitions discretize into a nonlinear system of algebraic equations, we will showcase how to use this utility to define nonlinear systems and solve inverse problems over them.
-
-First let's take a model which we wish to solve. Let's say we wish to solve the nonlinear system:
-
-```math
-\begin{align}
-0 = A*u^2 - b
-\end{align}
-```
-
-where ``A = [1.0, 2.0; 3.0, 4.0]`` and ``b = [1.0,2.0]``. We can follow the NonlinearSolve.jl documentation and solve this problem as follows:
-"""
-
-# ╔═╡ 17a15fc4-3bc3-4415-aa37-2520750e84a2
-function simplenonlinear!(du,u,p)
-	A = reshape(@view(p[1:4]), 2, 2)
-	b = @view p[5:6]
-	du .= A*u.^2 .- b
-end
-
-# ╔═╡ 745de76a-d18f-426f-a0e0-4fa318f833dd
-md"""
-Notice the `.` syntax in that expression. This is the Julia brodcast operator. It means, broadcast/map this operator over the whole array. So `a .* b` is element-wise multiplication, it's mapping the operator `*` over each element. On the other hand, `A*b` is matrix multiplication.
-
-`.=` is the in-place assignment operator. I.e., instead of creating a new vector `du`, this writes to an exisiting vector `du`. Thus as seen before with the ODE, many Julia interfaces are in-place, like C++ and Fortran interfaces, to assign to existing vectors and decrease the memory load on GC. This is a performance thing, if you're interested more in performance see the lecture notes on [Optimizing Serial Code from the SciML Book](https://book.sciml.ai/notes/02-Optimizing_Serial_Code/).
-
-Also note that we have setup `A` and `b` to be written from a parameter vector `p`. This is something we will exploit later for inverse problems.
-
-But okay, now let's solve this system using a Trust-Region Newton method:
-"""
-
-# ╔═╡ 14f88d60-783b-4757-b20e-d3ada57f16f7
-simpnon_u0 = [1.0,1.0]
-
-# ╔═╡ bd4b5bc1-d7c2-4408-9f35-ac69d75c16fe
-simpnon_p = [1.0,2.0,3.0,4.0,1.0,2.0]
-
-# ╔═╡ 6e709ba7-725d-4085-8078-d813766086e0
-simpnonprob = NonlinearProblem(simplenonlinear!, simpnon_u0, simpnon_p)
-
-# ╔═╡ dc408f51-ce63-44a8-98fb-a7ccd0dedcc0
-simpnonsol = solve(simpnonprob, TrustRegion())
-
-# ╔═╡ 0c888118-c40b-43e5-9fe8-e3f6d553610c
-simpnonsol.u
-
-# ╔═╡ 9a1b4857-8687-47a5-84d9-314149e66f13
-simpnonsol.resid
 
 # ╔═╡ c725adf8-4bfa-4046-929f-65dfef8c2309
 md"""
@@ -910,10 +815,8 @@ There are many questions as to how to take the basic template here and "do it be
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-NonlinearSolveFirstOrder = "5959db7a-ea39-4486-b5fe-2dd0bf03d60d"
 Optimization = "7f7a1694-90dd-40f0-9382-eb1efda571ba"
 OptimizationBBO = "3e6eede4-6085-4f62-9a71-46d9bc1eb92b"
-OrdinaryDiffEqTsit5 = "b1df2697-797e-41e3-8120-5422d3b24e4a"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 SciMLSensitivity = "1ed8b502-d754-442c-8d5d-10ac956f44a1"
 StableRNGs = "860ef19b-820b-49d6-a774-d7a799459cd3"
@@ -922,10 +825,8 @@ Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
-NonlinearSolveFirstOrder = "~1.2.0"
 Optimization = "~4.0.5"
 OptimizationBBO = "~0.4.0"
-OrdinaryDiffEqTsit5 = "~1.1.0"
 Plots = "~1.40.9"
 SciMLSensitivity = "~7.72.0"
 StableRNGs = "~1.0.2"
@@ -940,7 +841,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.6"
 manifest_format = "2.0"
-project_hash = "050da0e2cf88caaa72c321e71293534b4bec8d5c"
+project_hash = "26dfcdcfb121b5c8a4c16b7ecca4a4c9562ba0a4"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "72af59f5b8f09faee36b4ec48e014a79210f2f4f"
@@ -2346,16 +2247,6 @@ git-tree-sha1 = "edbf5309f9ddf1cab25afc344b1e8150b7c832f9"
 uuid = "38a345b3-de98-5d2b-a5d3-14cd9215e700"
 version = "2.40.2+2"
 
-[[deps.LineSearch]]
-deps = ["ADTypes", "CommonSolve", "ConcreteStructs", "FastClosures", "LinearAlgebra", "MaybeInplace", "SciMLBase", "SciMLJacobianOperators", "StaticArraysCore"]
-git-tree-sha1 = "97d502765cc5cf3a722120f50da03c2474efce04"
-uuid = "87fe0de2-c867-4266-b59a-2f0a94fc965b"
-version = "0.1.4"
-weakdeps = ["LineSearches"]
-
-    [deps.LineSearch.extensions]
-    LineSearchLineSearchesExt = "LineSearches"
-
 [[deps.LineSearches]]
 deps = ["LinearAlgebra", "NLSolversBase", "NaNMath", "Parameters", "Printf"]
 git-tree-sha1 = "e4c3be53733db1051cc15ecf573b1042b3a712a1"
@@ -2519,16 +2410,6 @@ deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 version = "1.11.0"
 
-[[deps.MaybeInplace]]
-deps = ["ArrayInterface", "LinearAlgebra", "MacroTools"]
-git-tree-sha1 = "54e2fdc38130c05b42be423e90da3bade29b74bd"
-uuid = "bb5d69b7-63fc-4a16-80bd-7e42200c7bdb"
-version = "0.1.4"
-weakdeps = ["SparseArrays"]
-
-    [deps.MaybeInplace.extensions]
-    MaybeInplaceSparseArraysExt = "SparseArrays"
-
 [[deps.MbedTLS]]
 deps = ["Dates", "MbedTLS_jll", "MozillaCACerts_jll", "NetworkOptions", "Random", "Sockets"]
 git-tree-sha1 = "c067a280ddc25f196b5e7df3877c6b226d390aaf"
@@ -2629,36 +2510,6 @@ version = "0.4.21"
 
 [[deps.NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
-version = "1.2.0"
-
-[[deps.NonlinearSolveBase]]
-deps = ["ADTypes", "Adapt", "ArrayInterface", "CommonSolve", "Compat", "ConcreteStructs", "DifferentiationInterface", "EnzymeCore", "FastClosures", "LinearAlgebra", "Markdown", "MaybeInplace", "Preferences", "Printf", "RecursiveArrayTools", "SciMLBase", "SciMLJacobianOperators", "SciMLOperators", "StaticArraysCore", "SymbolicIndexingInterface", "TimerOutputs"]
-git-tree-sha1 = "5bca24ce7b0c034dcbdc6ad6d658b02e0eed566e"
-uuid = "be0214bd-f91f-a760-ac4e-3421ce2b2da0"
-version = "1.4.0"
-
-    [deps.NonlinearSolveBase.extensions]
-    NonlinearSolveBaseBandedMatricesExt = "BandedMatrices"
-    NonlinearSolveBaseDiffEqBaseExt = "DiffEqBase"
-    NonlinearSolveBaseForwardDiffExt = "ForwardDiff"
-    NonlinearSolveBaseLineSearchExt = "LineSearch"
-    NonlinearSolveBaseLinearSolveExt = "LinearSolve"
-    NonlinearSolveBaseSparseArraysExt = "SparseArrays"
-    NonlinearSolveBaseSparseMatrixColoringsExt = "SparseMatrixColorings"
-
-    [deps.NonlinearSolveBase.weakdeps]
-    BandedMatrices = "aae01518-5342-5314-be14-df237901396f"
-    DiffEqBase = "2b5f629d-d688-5b77-993f-72d75c75574e"
-    ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
-    LineSearch = "87fe0de2-c867-4266-b59a-2f0a94fc965b"
-    LinearSolve = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
-    SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
-    SparseMatrixColorings = "0a514795-09f3-496d-8182-132a7b665d35"
-
-[[deps.NonlinearSolveFirstOrder]]
-deps = ["ADTypes", "ArrayInterface", "CommonSolve", "ConcreteStructs", "DiffEqBase", "FiniteDiff", "ForwardDiff", "LineSearch", "LinearAlgebra", "LinearSolve", "MaybeInplace", "NonlinearSolveBase", "PrecompileTools", "Reexport", "SciMLBase", "SciMLJacobianOperators", "Setfield", "StaticArraysCore"]
-git-tree-sha1 = "a1ea35ab0bcc99753e26d574ba1e339f19d100fa"
-uuid = "5959db7a-ea39-4486-b5fe-2dd0bf03d60d"
 version = "1.2.0"
 
 [[deps.ObjectFile]]
@@ -2794,22 +2645,6 @@ version = "1.3.3+0"
 git-tree-sha1 = "12f1439c4f986bb868acda6ea33ebc78e19b95ad"
 uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 version = "1.7.0"
-
-[[deps.OrdinaryDiffEqCore]]
-deps = ["ADTypes", "Accessors", "Adapt", "ArrayInterface", "DataStructures", "DiffEqBase", "DocStringExtensions", "EnumX", "FastBroadcast", "FastClosures", "FastPower", "FillArrays", "FunctionWrappersWrappers", "InteractiveUtils", "LinearAlgebra", "Logging", "MacroTools", "MuladdMacro", "Polyester", "PrecompileTools", "Preferences", "RecursiveArrayTools", "Reexport", "SciMLBase", "SciMLOperators", "SciMLStructures", "SimpleUnPack", "Static", "StaticArrayInterface", "StaticArraysCore", "SymbolicIndexingInterface", "TruncatedStacktraces"]
-git-tree-sha1 = "72c77ae685fddb6291fff22dba13f4f32602475c"
-uuid = "bbf590c4-e513-4bbe-9b18-05decba2e5d8"
-version = "1.14.1"
-weakdeps = ["EnzymeCore"]
-
-    [deps.OrdinaryDiffEqCore.extensions]
-    OrdinaryDiffEqCoreEnzymeCoreExt = "EnzymeCore"
-
-[[deps.OrdinaryDiffEqTsit5]]
-deps = ["DiffEqBase", "FastBroadcast", "LinearAlgebra", "MuladdMacro", "OrdinaryDiffEqCore", "PrecompileTools", "Preferences", "RecursiveArrayTools", "Reexport", "Static", "TruncatedStacktraces"]
-git-tree-sha1 = "96552f7d4619fabab4038a29ed37dd55e9eb513a"
-uuid = "b1df2697-797e-41e3-8120-5422d3b24e4a"
-version = "1.1.0"
 
 [[deps.PCRE2_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -4019,13 +3854,10 @@ version = "1.4.1+2"
 """
 
 # ╔═╡ Cell order:
-# ╟─45dc0462-d63c-11ef-0f62-e5d029618cc1
-# ╟─6d29e44b-3d70-4700-ad53-9e75df7ced0c
+# ╠═45dc0462-d63c-11ef-0f62-e5d029618cc1
 # ╟─51c67a4d-f49a-4bb5-a1c2-361ea0e8f20e
 # ╠═885f5685-5239-42aa-942c-2b9bdf7df220
-# ╟─ca453691-227c-44f1-8b48-8fb42c42d481
 # ╟─34efa390-0d6d-48dd-b08b-0c1bc391ffc2
-# ╠═448dd6ac-0d7f-4c1f-a9ce-3f9a586951c1
 # ╠═760b16ea-410f-4f46-ae44-f859de9b75e3
 # ╠═27059e1a-5f0c-40ac-85ea-ff6ad8d7b68c
 # ╠═9ff83b76-86dd-4520-ac20-df1eb30cc1dd
@@ -4036,17 +3868,6 @@ version = "1.4.1+2"
 # ╠═1e27f7dd-9d41-4fe9-b823-0013ef35927d
 # ╠═835c2922-37de-4e1b-b9ba-05a729eca801
 # ╟─2ab07370-1cf4-41db-b197-295d4cfd6a68
-# ╟─cba31d00-0a4a-4dab-aada-507ec1244bb1
-# ╟─e921a8b2-4fe8-41cb-8463-6297a7e1646d
-# ╠═e13c7d4f-4cdb-43d5-9f77-33401cb501e2
-# ╠═17a15fc4-3bc3-4415-aa37-2520750e84a2
-# ╟─745de76a-d18f-426f-a0e0-4fa318f833dd
-# ╠═14f88d60-783b-4757-b20e-d3ada57f16f7
-# ╠═bd4b5bc1-d7c2-4408-9f35-ac69d75c16fe
-# ╠═6e709ba7-725d-4085-8078-d813766086e0
-# ╠═dc408f51-ce63-44a8-98fb-a7ccd0dedcc0
-# ╠═0c888118-c40b-43e5-9fe8-e3f6d553610c
-# ╠═9a1b4857-8687-47a5-84d9-314149e66f13
 # ╟─c725adf8-4bfa-4046-929f-65dfef8c2309
 # ╠═c7193526-d32f-4f2a-95aa-09e98b88b30b
 # ╠═2c247d32-e215-48ac-95df-4c562333309f
