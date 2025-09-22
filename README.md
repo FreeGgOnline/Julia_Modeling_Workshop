@@ -33,7 +33,7 @@ Then simply paste the URLs below into the URL bar and hit enter. Then click "Edi
 
 For a comprehensive overview of Julia syntax and scientific modeling concepts:
 
-* [Scientific Modeling Cheatsheet (MATLAB – Python – Julia Quick Reference)](https://sciml.github.io/Julia_Modeling_Workshop/scientific_modeling_cheatsheet) - A cheatsheet for converting between MATLAB, Python, and Julia
+* [Scientific Modeling Cheatsheet (MATLAB – Python – Julia Quick Reference)](https://sciml.github.io/Scientific_Modeling_Cheatsheet/scientific_modeling_cheatsheet) - A cheatsheet for converting between MATLAB, Python, and Julia
 * [Julia Scientific Modeling Quick Reference](https://sciml.github.io/Julia_Modeling_Workshop/Julia_Scientific_Modeling_Quick_Reference) ([Pluto Notebook Source](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Julia_Scientific_Modeling_Quick_Reference.jl)) - A complete reference guide covering Julia basics, data structures, control flow, plotting, optimization, differential equations, and more
 
 ## Workshop Notebooks
