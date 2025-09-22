@@ -1,30 +1,4 @@
-# High-Performance Scientific Modeling with Julia and SciML
-
-## Quick Start: Running the Workshop Notebooks
-
-To open the Pluto notebooks, first install Pluto locally via:
-
-```julia
-using Pkg
-Pkg.install("Pluto")
-```
-
-and then run the following command to get Pluto running:
-
-```julia
-import Pluto; Pluto.run()
-```
-
-## Notebook URLs
-
-The notebooks for the workshop are available at the following URLs:
-
-* [Introduction to Julia for People Who Already Do Scientific Computing]()
-* [Introduction to Mathematical Modeling in Julia]()
-* [Inverse Problems and Parameter Estimation with SciML]()
-* [Scientific Machine Learning (SciML) and Equation Discovery with Julia]()
-
-## Detailed Getting Started with Julia and the Workshop
+## Getting Started with Julia
 
 ### Installing Julia
 
@@ -69,47 +43,3 @@ Thus for reproducibility we will be using Pluto notebooks for these notes.
 To get started with Pluto, simply install Pluto (`using Pkg; Pkg.add("Pluto")`) and then get it started: `using Pluto; Pluto.run()`. This will open the Pluto runner in your browser, and you can put the URL for a Pluto notebook in to open it on your computer. When you click edit it will make the document then live.
 
 Note: when you first make this notebook live, it will download all of the required packages. This notebook has a lot of things in there so that might take awhile! Be patient as it's installing ~200 big packages, but they will be reused for the later lectures.
-
-# Workshop Outline
-
-## Introduction to Julia for People Who Already Do Scientific Computing
-
-### Basic primer on:
-
-* Arrays
-* Loops
-* Structs
-* Multiple Dispatch
-
-### Making Code Fast:
-
-* Write functions
-* JIT compilation
-* Type-stability
-* Function Specialization
-
-## Introduction to Mathematical Modeling in Julia
-
-* Solving Differential Equations with DifferentialEquations.jl
-* Finding Steady States with NonlinearSolve.jl
-* Biological Modeling with Catalyst.jl
-* Symbolically Analyzing Models with ModelingToolkit.jl
-
-## Inverse Problems and Parameter Estimation with SciML
-
-* Nonlinear Optimization with Julia
-* Local Sensitivity Analysis and Automatic Differentiation of Solvers (Adjoint Methods) 
-* Parameter Estimation and Inverse Problems on Differential Equations
-* Investigating Local and Structural Identifiability
-
-## Scientific Machine Learning and Equation Discovery with Julia
-
-* Building and Training Universal Differential Equations
-* Symbolic Regression Model Discovery
-
-## (Coming Soon) High-Performance and GPU Computing for Julia Models
-
-* Multithreading
-* Distributed computing
-* CUDA + DifferentialEquations.jl
-* DiffEqGPU.jl
