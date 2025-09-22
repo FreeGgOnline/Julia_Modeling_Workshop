@@ -4,6 +4,9 @@
 using Markdown
 using InteractiveUtils
 
+# ╔═╡ 6884ec66-9f37-4c1c-8183-f9c66267763f
+using Statistics
+
 # ╔═╡ a1b2c3d4-e5f6-7890-abcd-ef1234567890
 md"""
 # Automatically Discover Missing Physics by Embedding Machine Learning into Differential Equations
@@ -63,7 +66,10 @@ import LineSearches
 import LinearAlgebra
 
 # ╔═╡ 448dd6ac-0d7f-4c1f-a9ce-3f9a586951c2
+# ╠═╡ disabled = true
+#=╠═╡
 import Statistics
+  ╠═╡ =#
 
 # ╔═╡ 760b16ea-410f-4f46-ae44-f859de9b75e4
 # External Libraries
@@ -249,7 +255,7 @@ optprob2 = OPT.OptimizationProblem(optf, res1.u)
 
 # ╔═╡ ca0123bc-0123-789a-bcde-567890123456
 res2 = OPT.solve(optprob2, OptimizationOptimJL.Optim.LBFGS(linesearch = LineSearches.BackTracking()),
-                callback = callback, maxiters = 1000)
+                callback = callback, maxiters = 2000)
 
 # ╔═╡ db1234cd-1234-89ab-cdef-678901234567
 println("Final training loss after $(length(losses)) iterations: $(losses[end])")
@@ -362,11 +368,24 @@ options = DataDrivenDiffEq.DataDrivenCommonOptions(
 # Solve each problem
 full_res = DataDrivenDiffEq.solve(full_problem, basis, opt, options = options)
 
+# ╔═╡ 7b58f994-1beb-4a79-8e68-e58ddc6539c0
+md"""
+#### SINDy Learned Prediction Model
+"""
+
+# ╔═╡ 5917315c-1dd0-4952-bd73-550c11c1ccdc
+full_eqs = DataDrivenDiffEq.get_basis(full_res)
+
 # ╔═╡ ebbc5c06-b74a-4f92-a632-3881b3d105c0
 ideal_res = DataDrivenDiffEq.solve(ideal_problem, basis, opt, options = options)
 
 # ╔═╡ 18048779-0f36-4577-9aef-52f19c9d362b
 nn_res = DataDrivenDiffEq.solve(nn_problem, basis, opt, options = options)
+
+# ╔═╡ 66c85f55-9f69-4821-80c4-8ec8851e183f
+md"""
+#### UDE Learned Prediction Model
+"""
 
 # ╔═╡ cce79c72-2b9b-4584-abf5-38b630dd8860
 nn_eqs = DataDrivenDiffEq.get_basis(nn_res)
@@ -380,90 +399,7 @@ for (name, res) in [("Full", full_res), ("Ideal", ideal_res), ("NN", nn_res)]
     println()
 end
 
-# ╔═╡ a9012345-1234-5678-cdef-789012345678
-md"""
-## Summary
-
-We successfully demonstrated how Universal Differential Equations can discover missing physics:
-
-1. Generated synthetic data from Lotka-Volterra equations with noise
-2. Built a hybrid model combining partial knowledge with neural networks
-3. Trained using two-stage optimization (ADAM + LBFGS)
-4. Applied symbolic regression to extract interpretable equations
-5. Validated the model with long-term predictions beyond training data
-
-The UDE approach discovered the missing predator-prey interaction terms, bridging mechanistic modeling and machine learning for interpretable scientific discovery. The model successfully extrapolates well beyond the training period, demonstrating that it has learned the true underlying dynamics rather than just fitting the data.
-"""
-
-# ╔═╡ a9b8c7d6-5e4f-3210-9876-543210fedcba
-md"""
-### Critical Difference: SINDy vs Universal Differential Equations
-
-This tutorial demonstrates a fundamental advantage of the UDE approach over pure data-driven methods like SINDy. Let's examine the three symbolic regression results:
-
-#### The Three Problems We Solved
-
-1. **Full Problem (Pure SINDy)**: Attempting to discover the entire system from scratch using only data
-2. **Ideal Problem**: Using the exact missing terms (cheating - assumes we know what we're looking for)
-3. **NN Problem (UDE Approach)**: Using the neural network's learned approximation of missing terms
-
-#### Key Insight: Prior Knowledge Makes the Difference
-
-When we look at the symbolic regression results:
-
-- **Full Problem (Pure SINDy)** fails to correctly identify the system. Without any prior knowledge, SINDy must search through an enormous space of possible terms, leading to incorrect or overly complex equations.
-
-- **NN Problem (UDE)** succeeds in recovering the correct terms. By incorporating our partial knowledge (the growth and death terms α·x and -δ·y), the neural network only needs to learn the missing interaction terms (β·x·y and γ·x·y).
-
-#### Why This Matters
-
-The UDE approach transforms an ill-posed problem into a well-posed one:
-
-1. **Reduced Search Space**: Instead of discovering 4 terms, we only need to discover 2
-2. **Physical Constraints**: The known physics acts as a strong regularization
-3. **Better Generalization**: The hybrid model respects conservation laws and physical principles
-4. **Interpretability**: The discovered terms have clear physical meaning (predator-prey interactions)
-
-#### The Mathematical Difference
-
-Let's see the actual discovered equations from our symbolic regression:
-"""
-
-# ╔═╡ 34e3b884-97c6-11f0-1dea-3342c720edc0
-begin
-    println("\n" * "="^60)
-    println("COMPARISON: SINDy vs UDE Discovered Systems")
-    println("="^60)
-
-    println("\n🎯 TRUE SYSTEM (Lotka-Volterra):")
-    println("dx/dt = 1.5x - 1.0xy")
-    println("dy/dt = -3.0y + 1.0xy")
-
-    println("\n❌ PURE SINDy (Full Problem - No Prior Knowledge):")
-    if @isdefined(full_res) && full_res !== nothing
-        eqs_full = DataDrivenDiffEq.get_basis(full_res)
-        params_full = DataDrivenDiffEq.get_parameter_map(eqs_full)
-        println("Discovered equations:")
-        println(full_res)
-    else
-        println("Failed to discover correct system")
-    end
-
-    println("\n✅ UDE APPROACH (NN Problem - With Prior Knowledge):")
-    if @isdefined(nn_res) && nn_res !== nothing
-        println("Known physics + Discovered missing terms:")
-        println("dx/dt = 1.5x + [discovered: -1.0xy]")
-        println("dy/dt = -3.0y + [discovered: 1.0xy]")
-        println("\nSymbolic regression result:")
-        println(nn_res)
-    else
-        println("Results pending...")
-    end
-
-    println("\n" * "="^60)
-end
-
-# ╔═╡ 34e3bb86-97c6-11f0-198e-1ba0bff9ca9b
+# ╔═╡ 9777c290-8024-4f21-8b68-75017f5c067c
 md"""
 This demonstrates that **incorporating even partial mechanistic knowledge dramatically improves the symbolic regression's ability to discover the correct underlying physics**. The neural network acts as a "scaffold" that guides the symbolic regression toward physically meaningful terms, turning an incorrect result into a correct one.
 
@@ -471,6 +407,9 @@ The comparison above shows:
 - **Pure SINDy** struggles without prior knowledge and often produces incorrect or overly complex equations
 - **UDE** successfully recovers the exact interaction terms by leveraging the known physics
 """
+
+# ╔═╡ 34e3bb86-97c6-11f0-198e-1ba0bff9ca9b
+
 
 # ╔═╡ 34e3bd20-97c6-11f0-2ae5-234797c6b56d
 md"""
@@ -604,7 +543,7 @@ begin
     # Plot 2: Neural Network Fit (3D surface)
     x_range = range(-0.5, 5, length=100)
     y_range = range(-0.5, 5, length=100)
-    nn_eval = [Lux.apply(trained_model, [x, y], res1.u, st)[1]
+    nn_eval = [Lux.apply(U, [x, y], res1.u, st)[1]
                for x in x_range, y in y_range]
 
     p2 = Plots.surface(
@@ -630,7 +569,7 @@ begin
            linestyle = :dash, label = "Training boundary")
 
     # Combine all plots
-    Plots.plot(p1, p2, p3, layout = (1, 3), size = (1200, 400))
+    Plots.plot(p1, p2, p3, layout = (3,1), size = (1200, 1200))
 end
 
 # ╔═╡ 34e3c8a6-97c6-11f0-3ecc-618fe114d0f1
@@ -645,18 +584,24 @@ begin
         xlabel = "x (prey)",
         ylabel = "y (predator)"
     )
-    plot!(p_phase,
+    Plots.plot!(p_phase,
         true_solution_long[1, :], true_solution_long[2, :],
         lw = 2,
         color = c3,
         linestyle = :dash,
         label = "True trajectory"
     )
-    scatter!(p_phase, [u0[1]], [u0[2]],
+    Plots.scatter!(p_phase, [u0[1]], [u0[2]],
             color = :red, markersize = 8,
             label = "Initial condition")
     p_phase
 end
+
+# ╔═╡ ee6ca134-11dc-4228-8b1f-6e438f018364
+mse_training2 = mean((Array(solution) .- estimate).^2)
+
+# ╔═╡ ee2cb693-e648-4b67-9148-8e41870d02bd
+mse_extrapolation2 = mean((Array(true_solution_long) .- Array(estimate_long)).^2)
 
 # ╔═╡ 34e3c9be-97c6-11f0-279d-2b8d4251a3fb
 begin
@@ -672,6 +617,21 @@ begin
     println("Extrapolation factor: ", round(t_long[2] / tspan[2], digits=1), "x beyond training")
     println("="^60)
 end
+
+# ╔═╡ 9663cdb4-5dd2-4435-bc86-c5f2d0bbc008
+md"""
+## Summary
+
+We successfully demonstrated how Universal Differential Equations can discover missing physics:
+
+1. Generated synthetic data from Lotka-Volterra equations with noise
+2. Built a hybrid model combining partial knowledge with neural networks
+3. Trained using two-stage optimization (ADAM + LBFGS)
+4. Applied symbolic regression to extract interpretable equations
+5. Validated the model with long-term predictions beyond training data
+
+The UDE approach discovered the missing predator-prey interaction terms, bridging mechanistic modeling and machine learning for interpretable scientific discovery. The model successfully extrapolates well beyond the training period, demonstrating that it has learned the true underlying dynamics rather than just fitting the data.
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -4278,13 +4238,14 @@ version = "1.9.2+0"
 # ╠═8de1fb5c-bccd-419e-b778-fd9feda4e66f
 # ╠═089c51e4-119d-4533-abdd-db0e63065f28
 # ╠═08ec594e-66a5-4b79-8b01-e1cccdcf3ce8
+# ╟─7b58f994-1beb-4a79-8e68-e58ddc6539c0
+# ╠═5917315c-1dd0-4952-bd73-550c11c1ccdc
 # ╠═ebbc5c06-b74a-4f92-a632-3881b3d105c0
 # ╠═18048779-0f36-4577-9aef-52f19c9d362b
+# ╟─66c85f55-9f69-4821-80c4-8ec8851e183f
 # ╠═cce79c72-2b9b-4584-abf5-38b630dd8860
 # ╠═ff567001-5678-cdef-0123-678901234567
-# ╟─a9012345-1234-5678-cdef-789012345678
-# ╟─a9b8c7d6-5e4f-3210-9876-543210fedcba
-# ╠═34e3b884-97c6-11f0-1dea-3342c720edc0
+# ╟─9777c290-8024-4f21-8b68-75017f5c067c
 # ╠═34e3bb86-97c6-11f0-198e-1ba0bff9ca9b
 # ╟─34e3bd20-97c6-11f0-2ae5-234797c6b56d
 # ╠═34e3bfd2-97c6-11f0-13d2-f30d38ac65fb
@@ -4306,6 +4267,10 @@ version = "1.9.2+0"
 # ╠═f75893b4-4fa1-4b3c-8289-73a726925926
 # ╠═34e3c5c2-97c6-11f0-38df-2f58f8a74aa2
 # ╠═34e3c8a6-97c6-11f0-3ecc-618fe114d0f1
+# ╠═6884ec66-9f37-4c1c-8183-f9c66267763f
+# ╠═ee6ca134-11dc-4228-8b1f-6e438f018364
+# ╠═ee2cb693-e648-4b67-9148-8e41870d02bd
 # ╠═34e3c9be-97c6-11f0-279d-2b8d4251a3fb
+# ╟─9663cdb4-5dd2-4435-bc86-c5f2d0bbc008
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
