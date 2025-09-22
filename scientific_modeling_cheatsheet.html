@@ -743,13 +743,9 @@ x = fminunc(@(x) deal(f(x), grad(x)), x0, options)</code></td>
                         <td><code>def grad(x):
     return np.array([2*x[0], 2*x[1]])
 res = minimize(f, x0, jac=grad)</code></td>
-                        <td><code>function fg!(F, G, x, p)
-    if G !== nothing
-        G[1] = 2x[1]; G[2] = 2x[2]
-    end
-    return x[1]^2 + x[2]^2
-end
-optf = OptimizationFunction(fg!, grad=true)
+                        <td><code>using OptimizationOptimJL, ADTypes
+f(x, p) = x[1]^2 + x[2]^2
+optf = OptimizationFunction(f, ADTypes.AutoForwardDiff())
 prob = OptimizationProblem(optf, [0.0, 0.0])
 sol = solve(prob, Optim.LBFGS())</code></td>
                     </tr>
