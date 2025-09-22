@@ -737,38 +737,45 @@ sol = solve(prob)</code></td>
                 <tbody>
                     <tr>
                         <td>Define mass matrix DAE</td>
-                        <td><code>% Mass matrix M (singular)
+                        <td><code>% ROBER DAE problem
 M = [1 0 0; 0 1 0; 0 0 0];
 
-function dydt = daefun(t, y)
-    dydt = [y(2);
-            -9.81 - y(3)*y(1);
-            y(1)^2 + y(2)^2 - 1];
+function dydt = rober(t, y)
+    k1 = 0.04; k2 = 3e7; k3 = 1e4;
+    dydt = [-k1*y(1) + k3*y(2)*y(3);
+            k1*y(1) - k2*y(2)^2 - k3*y(2)*y(3);
+            y(1) + y(2) + y(3) - 1];
 end</code></td>
                         <td><code># Not possible in SciPy
 # Assimulo/SUNDIALS exist but
 # are less maintained libraries</code></td>
-                        <td><code># Mass matrix DAE
+                        <td><code># ROBER DAE example
 using DifferentialEquations
 
-function f!(du, u, p, t)
-    du[1] = u[2]
-    du[2] = -9.81 - u[3]*u[1]
-    du[3] = u[1]^2 + u[2]^2 - 1
+function rober(du, u, p, t)
+    y₁, y₂, y₃ = u
+    k₁, k₂, k₃ = p
+    du[1] = -k₁*y₁ + k₃*y₂*y₃
+    du[2] = k₁*y₁ - k₂*y₂^2 - k₃*y₂*y₃
+    du[3] = y₁ + y₂ + y₃ - 1
 end
 
 M = [1.0 0 0
-     0   1 0
-     0   0 0]  # singular mass matrix
+     0   1.0 0
+     0   0   0]  # singular mass matrix
 
-f_ode = ODEFunction(f!, mass_matrix=M)
-prob = ODEProblem(f_ode, u0, tspan)</code></td>
+f_ode = ODEFunction(rober, mass_matrix=M)
+u0 = [1.0, 0, 0]
+tspan = (0.0, 1e-5)
+p = [0.04, 3e7, 1e4]
+prob = ODEProblem(f_ode, u0, tspan, p)</code></td>
                     </tr>
                     <tr>
                         <td>Solve mass matrix DAE</td>
                         <td><code>options = odeset('Mass', M, ...
                   'MStateDependence', 'none');
-[t, y] = ode15s(@daefun, [0 10], y0, options)</code></td>
+y0 = [1; 0; 0];
+[t, y] = ode15s(@rober, [0 1e-5], y0, options)</code></td>
                         <td><code># Not possible in SciPy</code></td>
                         <td><code>sol = solve(prob, Rodas5())
 # Automatically detects DAE and uses
