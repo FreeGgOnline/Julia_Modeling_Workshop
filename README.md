@@ -22,7 +22,8 @@ Then simply paste the URLs below into the URL bar and hit enter. Then click "Edi
 The notebooks for the workshop are available at the following URLs:
 
 * [Introduction to Julia for People Who Already Do Scientific Computing]()
-* [Introduction to Mathematical Modeling in Julia]()
+* [Introduction to Mathematical Modeling in Julia: Numerical Solvers for Differential Equations and Nonlinear Systems](https://github.com/SciML/Julia_Modeling_Workshop/blob/main/Forward_Modeling.jl)
+* [Symbolic-Numeric Model Definitions with Symbolics.jl and ModelingToolkit.jl]()
 * [Solving Inverse Problems and Parameter Estimation with Julia's SciML]()
 * [Scientific Machine Learning (SciML) and Equation Discovery with Julia]()
 
@@ -32,6 +33,7 @@ If you would like to view the notebook files without having to run them locally,
 
 * [Introduction to Julia for People Who Already Do Scientific Computing]()
 * [Introduction to Mathematical Modeling in Julia]()
+* [Symbolic-Numeric Model Definitions with Symbolics.jl and ModelingToolkit.jl]()
 * [Solving Inverse Problems and Parameter Estimation with Julia's SciML]()
 * [Scientific Machine Learning (SciML) and Equation Discovery with Julia]()
 
@@ -103,6 +105,8 @@ Note: when you first make this notebook live, it will download all of the requir
 
 * Solving Differential Equations with DifferentialEquations.jl
 * Finding Steady States with NonlinearSolve.jl
+
+## Symoblic-Numeric 
 * Biological Modeling with Catalyst.jl
 * Symbolically Analyzing Models with ModelingToolkit.jl
 
