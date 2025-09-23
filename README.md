@@ -18,7 +18,7 @@ To open the Pluto notebooks, first install Pluto locally via:
 
 ```julia
 using Pkg
-Pkg.install("Pluto")
+Pkg.add("Pluto")
 ```
 
 and then run the following command to get Pluto running:
