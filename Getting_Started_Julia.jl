@@ -35,11 +35,9 @@ md"""
 
 There are two recommended ways to install Julia:
 
-### Option 1: Direct Download (Simple)
-Visit [julialang.org/downloads](https://julialang.org/downloads/) and download the binary for your operating system.
-
-### Option 2: Juliaup (Recommended for Long-term Use)
-Juliaup makes it easy to manage and update Julia versions:
+### Option 1: Juliaup
+Juliaup makes it easy to manage and update Julia versions.
+It's also the easiest way to make sure you get the right version, and it is installed the right way etc.
 
 **Windows:** Install from the Microsoft Store
 
@@ -48,13 +46,21 @@ Juliaup makes it easy to manage and update Julia versions:
 curl -fsSL https://install.julialang.org | sh
 ```
 
-### Essential Juliaup Commands
-- `juliaup help` - Show all commands
-- `juliaup update` - Update Julia to latest version
-- `juliaup default release` - Use latest stable release (recommended)
-- `juliaup default lts` - Use long-term support version
+After installation, type `julia` in your terminal to start the REPL.
+You can use the `juliaup` command on your commandline to manage julia versions
+See `juliaup --help` for details.
 
-After installation, type `julia` in your terminal to start the REPL!
+### Option 2: Direct Download (Simple)
+Visit [julialang.org/downloads](https://julialang.org/downloads/) and download the binary for your operating system.
+
+### Bad Option: Install with your package manager
+It is strongly recommended against using your system package manager (apt, homebrew etc) to install julia.
+
+
+For various reasons they tend to distribute a version that is either:
+ - wildly out of date (like 5-10 years),
+ - linked to subtly broken versions of libraries;
+ - both!
 """
 
 # ╔═╡ 4d5e6f78-90ab-cdef-2345-678901234567
@@ -69,11 +75,13 @@ Understanding Julia's philosophy helps you write better code:
 - They try to give you what you want
 - May hide complexity behind the scenes
 - Prioritize ease over speed
+- Using library code written in C is much faster than anything you can write yourself in the language.
 
 **C/Fortran:** Like talking to a philosopher
 - Demand extreme specificity
 - Require deep understanding of details
 - Fast but verbose
+- Everything might catch fire if you do it wrong
 
 **Julia:** Like talking to a scientist
 - Surface simplicity with specific underlying details
@@ -82,10 +90,13 @@ Understanding Julia's philosophy helps you write better code:
 - Expects precision but rewards with performance
 
 ### Key Principles
-1. **Write generic code, get specific performance** - The compiler specializes your code
-2. **Two-language problem solved** - Prototype and production in the same language
-3. **Composability** - Packages work together naturally through shared abstractions
-4. **Speed without sacrifice** - Fast code that's still readable
+1. **Write generic code, get specific performance** - The compiler specializes your code.
+   - Regardless of if you put type annotation on functions it always specialized on types of inputs.
+2. **Two-language problem solved** - Prototype and production in the same language.
+   - Not all julia code it fast, you can write quick sloppy code. But you can then start to take care and write fast efficient code only in the critical parts. And at all times you just write Julia.
+3. **Don't reinvent the wheel** - Julia has a built in package manager and a lot of excellent libraries. Further, it has excellent ability to call code written in C, python, R etc.
+4. **Composability** - Packages work together naturally through shared abstractions.
+5. **Speed without sacrifice** - Fast code that's still readable
 """
 
 # ╔═╡ 5e6f7890-abcd-ef12-3456-789012345678
@@ -141,15 +152,6 @@ md"""
 
 Julia's package manager is built into the REPL. Press `]` to enter package mode:
 
-### Essential Package Commands
-- `help` - Show all commands
-- `st` or `status` - Show installed packages
-- `add PackageName` - Install a package
-- `rm PackageName` - Remove a package
-- `update` - Update all packages
-- `activate .` - Activate environment in current directory
-- `instantiate` - Install all packages from Project.toml
-
 ### Creating Environments
 Environments isolate package dependencies per project:
 
@@ -159,14 +161,63 @@ activate MyProject
 add DataFrames Plots
 ```
 
-This creates `Project.toml` and `Manifest.toml` files that exactly specify your dependencies.
+This creates `Project.toml` and `Manifest.toml` files specify your dependencies.
+The `Project.toml` specifies dependencies, including version compatibility at a high level.
+from it Pkg generates a `Manifest.toml` which says exactly what version is being installed -- including of indirect dependencies.
+You may or may not want to version control your `Manifest.toml`.
 
-### From Code
-```julia
-using Pkg
-Pkg.add("PackageName")
-Pkg.activate("path/to/environment")
+It is normal to create one julia enviroment per project you are working on, to keep things isolated and manage your dependencies and make sure things stay compatible.
+(And required to do so if that project is a julia package).
+
+### Essential Pkg Commands
+- `add PackageName` - Install a package
+- `rm PackageName` - Remove a package
+- `update` - Update all packages
+- `resolve - Determine versions of all packages specified in `Project.toml` generating a `Manifest.toml` (implictly called by above.)
+- `instantiate` - Install all packages from Manifest.toml (implictly called by above)
+
+- `st` or `status` - Show installed packages
+- `activate .` - Activate environment in current directory
+- `help` - Show all commands
+
+### Starting/Change Julia to a particular enviroment
+
+#### From commandline
+```bash
+julia --project="."
 ```
+
+#### With-in Julia REPL:
+As per above for creating an enviroment.
+```
+activate .
+```
+
+#### In VS-Code
+Either from the open REPL as above
+In bottom right click the text that will start out saying `(Main)`.
+
+#### In JuPyTer
+```julia
+using Pkg: @pkg_str
+pkg"activate ."
+```
+
+#### In Pluto:
+Each file in pluto has its own internal hidden Project.toml and Manifest.toml,
+with things being automatically installed when you first import them.
+but if you want to use external one, it is as per JuPyTer.
+
+
+## Global Enviroment
+
+If you start julia without specifying an enviroment you are placed in the global enviroment.
+Things installed here are available no matter what enviroment you have activated.
+
+Its common to install development tools here, like `Pluto`, `IJulia`, `BenchmarkTools` and `Revise`.
+
+Its discouraged from installing tools you need for your science her since you want to keep a nice isolated enviroment per project so it is easy to give to others.
+
 """
 
 # ╔═╡ 7890abcd-ef12-3456-789a-bcdef1234567
